@@ -1,0 +1,10 @@
+﻿{
+	"Name":"YaogUI",
+	"DisplayName":"YaogUI",
+	"Desc":"UI changes and improvements",
+	"UIPackage":"UI/YaogUI",
+	"UIPackage说明":"UI changes and improvements",
+	"GameVersion":1.2,
+	"Version": 0.1,
+	"Author":"tdsat"
+}
