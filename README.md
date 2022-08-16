@@ -5,7 +5,14 @@ A UI mod for Amazing Cultivation Simulator. Currently in very early stages of de
 This is mostly intended for the english version of the game, but most of the features _should_ work in the chinese version too.
 
 
-# TODO
+### Development
+
+The `Source` folder (hopefully) contains everything related to this mod. You can safely remove that folder if you are not interested in development.
+ 
+- `Source\YaogUI` contains the Visual Studio solution and the code for the Harmony patches
+- `Source\FairyProject` contains any new UI elements using [Fairy GUI](https://fairygui.com)
+
+### TODO
 
 This is a non-exhaustive list that I plan to work on. I can't give any promises for any of those since I'm not sure how to do most of those. I would appreciate any tips or PRs!
 
