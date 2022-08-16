@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component size="202,26" overflow="hidden" extention="Button">
+  <controller name="button" pages="0,up,1,down,2,over,3,selectedOver" selected="0"/>
+  <displayList>
+    <image id="n7" name="background" src="kjtf3o" fileName="images/bg_ban007.png" pkg="ncbwb41m" xy="-2,-2" size="206,29">
+      <gearDisplay controller="button" pages="0,1,2,3"/>
+      <gearColor controller="button" pages="2" values="#cfcfcf" default="#ffffff"/>
+      <relation target="" sidePair="width-width,height-height"/>
+    </image>
+    <loader id="n4" name="icon" xy="0,2" size="23,21" restrictSize="0,140,0,41" url="thing://2,Item_SpellLv3" vAlign="middle" fill="scale" shrinkOnly="true" playing="false">
+      <relation target="" sidePair="width-width,height-height"/>
+    </loader>
+    <text id="n8_e4d4" name="title" xy="27,3" size="173,19" fontSize="12" color="#ffe5a1" vAlign="middle" ubb="true" autoSize="none" strokeColor="#514030" autoClearText="true" text="Title">
+      <relation target="" sidePair="width-width,bottom-bottom,center-center"/>
+    </text>
+  </displayList>
+  <Button downEffect="dark" downEffectValue=".8"/>
+</component>

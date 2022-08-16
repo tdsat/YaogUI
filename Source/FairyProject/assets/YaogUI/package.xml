@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<packageDescription id="m5coew5e">
+  <resources>
+    <component id="sglfb2" name="TalismanListItem.xml" path="/List/"/>
+    <component id="sglfb5" name="YaogUI.xml" path="/" exported="true"/>
+  </resources>
+  <publish name="" path="..\..\UI\" packageCount="2" codePath="D:\Games\Amazing Cultivation Simulator\Mods\YaogUI\UI"/>
+</packageDescription>

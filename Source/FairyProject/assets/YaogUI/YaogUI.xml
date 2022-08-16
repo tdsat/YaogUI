@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component size="335,334" extention="Label" initName="frame">
+  <displayList>
+    <list id="n8_sglf" name="n8" xy="10,136" size="315,171" overflow="scroll">
+      <item url="ui://m5coew5esglfb2"/>
+    </list>
+  </displayList>
+</component>
