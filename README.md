@@ -16,7 +16,7 @@ The `Source` folder (hopefully) contains everything related to this mod. You can
 
 This is a non-exhaustive list that I plan to work on. I can't give any promises for any of those since I'm not sure how to do most of those. I would appreciate any tips or PRs!
 
- - [ ] Add a button to quickly send a disciple to camp/adventure in the 'Power Management' window
+ - [X] Add a button to quickly send a disciple to camp/adventure in the 'Power Management' window
  - [ ] Automatically remove 'X is hurt' message if the target is no longer hurt
  - [ ] Ability to save/favorite talismans
 	-  Need to figure out how saves work
