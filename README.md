@@ -17,13 +17,14 @@ The `Source` folder (hopefully) contains everything related to this mod. You can
 This is a non-exhaustive list that I plan to work on. I can't give any promises for any of those since I'm not sure how to do most of those. I would appreciate any tips or PRs!
 
  - [X] Add a button to quickly send a disciple to camp/adventure in the 'Power Management' window
- - [ ] Automatically remove 'X is hurt' message if the target is no longer hurt
+ - [X] Automatically remove 'X is hurt' message if the target is no longer hurt
  - [ ] Ability to save/favorite talismans
 	-  Need to figure out how saves work
  - [ ] Search in trade window
  - [ ] Pin common trade items to top of trade window (like Spirit Stones/Crystals etc)
  - [ ] Improve the inner disciples spell list
  - [ ] Make features optional through the UI
+ - [ ] Add more options to the sidebar message configuration (eg "Ignore 'There is a fire' messages" etc)
 
  There are other changes that I would like to implement, like the ability to move items between storage spaces, but that is beyond my abilities for now.
 

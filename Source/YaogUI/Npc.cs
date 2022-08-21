@@ -9,7 +9,7 @@ namespace YaogUI
 		public static void Prefix(Npc __instance, bool isgod = false, bool nojiehui = false)
 		{
 
-			if (__instance.IsPuppet && !string.IsNullOrEmpty(__instance.Author))
+			if (!__instance.IsCorpse && __instance.IsPuppet && !string.IsNullOrEmpty(__instance.Author) )
             {
 				__instance.SetName(__instance.Author + "'s " + __instance.GetName());
 			}

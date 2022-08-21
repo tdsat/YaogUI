@@ -14,6 +14,16 @@ end
 
 function YaogUI:OnInit()
 	print("YaogUI Initiated");
+	local tbEventMod = GameMain:GetMod("_Event")
+
+	-- Clean messages on load
+	local list = ThingMgr.NpcList
+	for _, npc in pairs(list) do
+		if npc.IsPlayerThing and npc.AtG then
+			self:ClearMessageIfHealthy(npc);
+		end
+	end
+	tbEventMod:RegisterEvent(g_emEvent.NpcHealthChanged, self.ClearMessageIfHealthy, self)
 end
 
 function YaogUI:OnEnter()
@@ -32,5 +42,28 @@ function FilterList(list, needle, searchTextCb)
 		else
 			Item.visible = false
 		end
+	end
+end
+
+function YaogUI:ClearMessageIfHealthy(npc, objs)
+	if npc == nil or npc.IsPlayerThing == false or npc.AtG == false or npc.IsPuppet then return end;
+	local bdDamageItems = npc.PropertyMgr.BodyData.m_DamageID;
+	local doRemoveMesages = true;
+	if (bdDamageItems.Count > 0) then
+		for _, dmg in pairs(bdDamageItems) do
+			if dmg.def.Trend ~= 0.0 then
+				-- We check all bodyparts. If at least one is still healing, then we don't remove the message
+				doRemoveMesages = false;
+			end
+		end
+		if doRemoveMesages then
+			MessageMgr:RemoveMessage(50, {npc}); -- X : hurt message
+			MessageMgr:RemoveMessage(51, {npc}); -- X : Injury deteriorating messages
+			print('[YaogUI]Removed message for ' .. npc.Name);
+		end
+	else
+		MessageMgr:RemoveMessage(50, {npc}); -- X : hurt message
+		MessageMgr:RemoveMessage(51, {npc}); -- X : Injury deteriorating messages
+		print('[YaogUI]No damage found for ' .. npc.Name);
 	end
 end
