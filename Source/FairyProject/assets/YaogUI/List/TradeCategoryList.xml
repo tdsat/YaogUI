@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component size="211,314">
+  <displayList>
+    <image id="n1_dgsu" name="bg" src="kjtf3p" fileName="images/bg_ban008.png" pkg="ncbwb41m" xy="0,0" size="211,314">
+      <relation target="" sidePair="width-width,height-height"/>
+    </image>
+    <image id="n2_dgsu" name="bg_title" src="kjtf47" fileName="images/bg_title001.png" pkg="ncbwb41m" xy="48,-11" size="117,29" restrictSize="0,200,0,0">
+      <relation target="" sidePair="width-width,center-center"/>
+    </image>
+    <richtext id="n3_dgsu" name="title" xy="66,-7" size="81,21" fontSize="12" align="center" vAlign="middle" autoSize="none" text="Categories"/>
+    <list id="n0_dgsu" name="list" xy="23,22" size="165,277" overflow="scroll" defaultItem="ui://ncbwb41mv6070" foldInvisibleItems="true">
+      <relation target="" sidePair="width-width,height-height"/>
+    </list>
+  </displayList>
+</component>

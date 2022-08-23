@@ -4,5 +4,6 @@
     <list id="n8_sglf" name="n8" xy="10,136" size="315,171" overflow="scroll">
       <item url="ui://m5coew5esglfb2"/>
     </list>
+    <component id="n10_dgsu" name="YaogUI.TradeCategoryList" src="dgsub6" fileName="List/TradeCategoryList.xml" xy="-224,10"/>
   </displayList>
 </component>

@@ -62,6 +62,7 @@
   <ItemGroup>
     <Compile Include="SectPower.cs" />
     <Compile Include="Npc.cs" />
+    <Compile Include="TradeWindow.cs" />
     <Compile Include="YaogUI.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

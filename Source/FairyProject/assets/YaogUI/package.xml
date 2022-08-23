@@ -3,6 +3,7 @@
   <resources>
     <component id="sglfb2" name="TalismanListItem.xml" path="/List/"/>
     <component id="sglfb5" name="YaogUI.xml" path="/" exported="true"/>
+    <component id="dgsub6" name="TradeCategoryList.xml" path="/List/"/>
   </resources>
   <publish name="" path="..\..\UI\" packageCount="2" codePath="D:\Games\Amazing Cultivation Simulator\Mods\YaogUI\UI"/>
 </packageDescription>
