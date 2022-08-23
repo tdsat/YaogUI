@@ -17,12 +17,10 @@ namespace YaogUI
 				var tradeWindow = __instance;
 				if (tradeWindow.UIInfo.GetChild("YaogUI.CategoryList") == null)
 				{
-					KLog.Dbg("[YaogUI] Panel not exist,adding");
 					categoryPanel = (GComponent)UIPackage.CreateObjectFromURL("ui://m5coew5edgsub6");
 					categoryPanel.name = "YaogUI.CategoryList";
 					tradeWindow.UIInfo.AddChild(categoryPanel);
 				} else {
-					KLog.Dbg("[YaogUI] Panel already exists");
 					categoryPanel = (GComponent)tradeWindow.UIInfo.GetChild("YaogUI.CategoryList");
 				}
 				var sellItemList = tradeWindow.UIInfo.m_rightitem;
@@ -49,6 +47,64 @@ namespace YaogUI
 			{
 				KLog.Dbg("[YaogUI] error" + e.ToString(), new object[0]);
 			}
+		}
+	}
+
+	[HarmonyPatch(typeof(Wnd_SchoolTrade), "OnInit")]
+	public static class AddTradeWindowSellItemSearch
+	{
+		public static void Postfix(Wnd_SchoolTrade __instance)
+		{
+			try
+			{
+				var tradeWindow = __instance;
+				var searchInput = (GLabel)UIPackage.CreateObjectFromURL("ui://ncbwb41mv6072k");
+				var clearSearchBtn = (GButton)UIPackage.CreateObjectFromURL("ui://ncbwb41mv6076");
+				searchInput.name = "YaogUI.SearchInput";
+				clearSearchBtn.name = "YaogUI.ClearSearchInput";
+
+				var list = tradeWindow.UIInfo.m_rightitem;
+				list.foldInvisibleItems = true;
+
+				searchInput.x = list.x - 10;
+				searchInput.y = list.y - 40;
+				searchInput.width = list.width - 40;
+				clearSearchBtn.x = searchInput.x + searchInput.width;
+				clearSearchBtn.y = searchInput.y - 1;
+				clearSearchBtn.text = "Clear";
+				searchInput.onKeyDown.Add(e => {
+					var input = (InputTextField)e.initiator;
+					filterList(
+						list,
+						item => item.m_typename.text == "ItemType" || item.m_itemname.text.ToLower().Contains(input.text.ToLower())
+					);
+				});
+				tradeWindow.onRemovedFromStage.Add(e => clearSearch(list, searchInput));
+				clearSearchBtn.onClick.Add(e => clearSearch(list, searchInput));
+
+				tradeWindow.UIInfo.AddChild(searchInput);
+				tradeWindow.UIInfo.AddChild(clearSearchBtn);
+				tradeWindow.UIInfo.m_n51.onClickItem.Add(e => clearSearch(list, searchInput));
+			}
+			catch (Exception e)
+			{
+				KLog.Dbg("[YaogUI] error" + e.ToString(), new object[0]);
+			}
+		}
+      
+		private static void filterList(GList list, Func<UI_TradeItem, bool> searchCallback )
+        {
+			var items = list.GetChildren();
+			foreach (UI_TradeItem item in items)
+			{
+				item.visible = searchCallback(item);
+			}
+		}
+
+		private static void clearSearch(GList list, GLabel searchField)
+        {
+			searchField.text = "";
+			filterList(list, item => true);
 		}
 	}
 }
