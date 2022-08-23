@@ -4,6 +4,14 @@ A UI mod for Amazing Cultivation Simulator. Currently in very early stages of de
 
 This is mostly intended for the english version of the game, but most of the features _should_ work in the chinese version too.
 
+# Features
+
+ - Ability to search when crafting items. The talisman list also has a new look
+ - Ability to search user items when trading
+   - Category bookmarks have also been added to make it easier to jump between item categories
+ - When a vessel dies, it name changes to '[Owner]'s Vessel' to make it easier to identify who owns it
+ - 'X : Hurt' and 'X : injury deteriorating' messages get cleaned if the affected pawn get healed
+   - Experimental - Any feedback appreciated
 
 ### Development
 
@@ -20,7 +28,7 @@ This is a non-exhaustive list that I plan to work on. I can't give any promises 
  - [X] Automatically remove 'X is hurt' message if the target is no longer hurt
  - [ ] Ability to save/favorite talismans
 	-  Need to figure out how saves work
- - [ ] Search in trade window
+ - [X] Search in trade window
  - [ ] Pin common trade items to top of trade window (like Spirit Stones/Crystals etc)
  - [ ] Improve the inner disciples spell list
  - [ ] Make features optional through the UI
