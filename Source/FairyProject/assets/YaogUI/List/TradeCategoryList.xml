@@ -8,8 +8,11 @@
       <relation target="" sidePair="width-width,center-center"/>
     </image>
     <richtext id="n3_dgsu" name="title" xy="66,-7" size="81,21" fontSize="12" align="center" vAlign="middle" autoSize="none" text="Categories"/>
-    <list id="n0_dgsu" name="list" xy="23,22" size="165,277" overflow="scroll" defaultItem="ui://ncbwb41mv6070" foldInvisibleItems="true">
+    <list id="n0_dgsu" name="list" xy="23,46" size="165,250" overflow="scroll" defaultItem="ui://ncbwb41mv6070" foldInvisibleItems="true">
       <relation target="" sidePair="width-width,height-height"/>
     </list>
+    <component id="n4_on84" name="hideWorthlessCheckbox" src="v9j6aj" fileName="Checkbox/Checkbox2.xml" pkg="ncbwb41m" xy="26,21" size="154,19" tooltips="Hides items that have a price of zero.">
+      <Button title="Hide worthless items"/>
+    </component>
   </displayList>
 </component>

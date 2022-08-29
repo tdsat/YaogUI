@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component size="183,20" extention="Label" initName="YaogUI.ClearableInput">
+  <controller name="grayed" pages="0,,1," selected="0"/>
+  <displayList>
+    <image id="n0" name="n0" src="xwd7al" fileName="images/bg_ban020.png" pkg="ncbwb41m" xy="0,0" size="144,20">
+      <gearLook controller="grayed" pages="1" values="1,0,1,1" default="1,0,0,1"/>
+      <relation target="" sidePair="width-width,height-height"/>
+    </image>
+    <text id="n1" name="title" xy="9,1" size="124,19" fontSize="12" color="#ffe5a1" vAlign="middle" autoSize="none" singleLine="true" autoClearText="true" text="afasdasd" input="true">
+      <gearColor controller="grayed" pages="0,1" values="#ffe5a1,#000000|#787b7b,#000000"/>
+      <relation target="" sidePair="width-width,height-height"/>
+    </text>
+    <component id="n2_on84" name="clearButton" src="v9j6ah" fileName="Button/Button2.xml" pkg="ncbwb41m" xy="133,0" size="49,20">
+      <relation target="" sidePair="rightext-left,rightext-right,leftext-left,leftext-right"/>
+      <Button title="Clear" titleFontSize="11"/>
+    </component>
+  </displayList>
+</component>

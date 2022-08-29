@@ -2,9 +2,9 @@ local TalismanPaint = GameMain:GetMod("TalismanPaint")
 local Wnd_FuPatinter = CS.Wnd_FuPatinter.Instance;
 
  local function AddSearchInput()
-	local SearchInput = UIPackage.CreateObjectFromURL("ui://ncbwb41mv6072k");
+	local SearchInput = UIPackage.CreateObjectFromURL("ui://m5coew5eon84b7");
 	TalismanPaint.SearchInput = SearchInput;
-	SearchInput.name = 'SearchInput';
+	SearchInput.name = 'YaogUI.TalismanSearch';
 	Wnd_FuPatinter.contentPane:AddChild(SearchInput);
 	TalismanPaint.TalismanList = Wnd_FuPatinter.contentPane.m_n25;
 	--  So that invisible itens take no space
@@ -21,7 +21,7 @@ local function ChangeList()
 	local list = TalismanPaint.TalismanList;
 	local bg = Wnd_FuPatinter.contentPane.m_n61;
 	local input = TalismanPaint.SearchInput;
-	local btn = UIPackage.CreateObjectFromURL("ui://ncbwb41mv6076");
+	local btn = TalismanPaint.SearchInput.m_clearButton;
 
 	list.autoResizeItem = true
 	list.defaultItem = 'ui://m5coew5esglfb2';
@@ -33,14 +33,10 @@ local function ChangeList()
 	bg.x =  Wnd_FuPatinter.contentPane.x - 265;
 
 	if input ~= nil then
-		input.x = Wnd_FuPatinter.contentPane.x - 260;
+		input.width = list.width + 10;
+		input.x = list.x - 10;
 
- 		btn.text = 'Clear';
-		btn.x = input.x + 200
-		btn.y = input.y - 2;
 		btn.onClick:Add(ClearSearchInput)
-		Wnd_FuPatinter.contentPane:AddChild(btn);
-		input.width = 260 - btn.width;
 	end
 end
 

@@ -418,3 +418,5 @@ FodyWeavers.xsd
 .vscode/*.code-snippets
 
 Source/YaogUI/obj/Debug/YaogUI.csproj.FileListAbsolute.txt
+Source/XiaWorld/Assets/Resources/UIData/
+

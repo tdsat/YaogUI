@@ -5,7 +5,7 @@ using HarmonyLib;
 
 namespace YaogUI
 {
-	public static class Main
+    public static class Main
 	{
 		public static void Patch()
 		{
@@ -14,12 +14,17 @@ namespace YaogUI
 				Assembly.LoadFrom(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "0Harmony.dll"));
 				Harmony harmony = new Harmony("YaogUI!");
 				harmony.PatchAll();
-				KLog.Dbg("[YaogUI] Loaded!", new object[0]);
+				YaogUIBinder.BindAll();
+				Debug("Loaded!");
 			}
 			catch (Exception e)
 			{
-				KLog.Dbg("[YaogUI] error" + e.ToString(), new object[0]);
+				Debug(e.ToString());
 			}
+		}
+		public static void Debug(string message)
+		{
+			KLog.Dbg(string.Format("[YaogUI]{0}", message), new object[0]);
 		}
 	}
 }
