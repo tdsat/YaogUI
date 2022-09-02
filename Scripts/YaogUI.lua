@@ -59,11 +59,11 @@ function YaogUI:ClearMessageIfHealthy(npc, objs)
 		if doRemoveMesages then
 			MessageMgr:RemoveMessage(50, {npc}); -- X : hurt message
 			MessageMgr:RemoveMessage(51, {npc}); -- X : Injury deteriorating messages
-			print('[YaogUI]Removed message for ' .. npc.Name);
+			-- print('[YaogUI]Removed message for ' .. npc.Name);
 		end
 	else
 		MessageMgr:RemoveMessage(50, {npc}); -- X : hurt message
 		MessageMgr:RemoveMessage(51, {npc}); -- X : Injury deteriorating messages
-		print('[YaogUI]No damage found for ' .. npc.Name);
+		-- print('[YaogUI]No damage found for ' .. npc.Name);
 	end
 end
