@@ -4,23 +4,34 @@ A UI mod for Amazing Cultivation Simulator. Currently in very early stages of de
 
 This is mostly intended for the english version of the game, but most of the features _should_ work in the chinese version too.
 
+Releases can be downloaded from [NexusMods](https://www.nexusmods.com/amazingcultivationsimulator/mods/9/)
+
 # Features
 
- - Ability to search when crafting items. The talisman list also has a new look
- - Ability to search user items when trading
-   - Category bookmarks have also been added to make it easier to jump between item categories
- - When a vessel dies, it name changes to '[Owner]'s Vessel' to make it easier to identify who owns it
- - 'X : Hurt' and 'X : injury deteriorating' messages get cleaned if the affected pawn get healed
-   - Experimental - Any feedback appreciated
+### Trade Window
+- Ability to search user items
+- Category bookmarks to make it easier to jump between item categories
+- Sold items are sorted alphabetically
+- Added a checkbox to exclude worthless items from the list
+  - By worthless I mean items that have a trade value of 0, not useless.
 
-### Development
+### Talisman Drawing Window
+- Ability to search when crafting item
+- Talisman list also has a new look
+
+### Other
+- When a vessel dies, it name changes to '[Owner]'s Vessel' to make it easier to identify who owns it
+- 'X : Hurt' and 'X : injury deteriorating' messages get cleaned if the affected pawn get healed
+  - Experimental - Any feedback appreciated
+
+# Development
 
 The `Source` folder (hopefully) contains everything related to this mod. You can safely remove that folder if you are not interested in development.
  
 - `Source\YaogUI` contains the Visual Studio solution and the code for the Harmony patches
 - `Source\FairyProject` contains any new UI elements using [Fairy GUI](https://fairygui.com)
 
-### TODO
+# TODO
 
 This is a non-exhaustive list that I plan to work on. I can't give any promises for any of those since I'm not sure how to do most of those. I would appreciate any tips or PRs!
 
