@@ -84,11 +84,23 @@ namespace YaogUI
 					{
 						TreeNode itemNode = folder.GetChildAt(j);
 						TradeSaleList.NodeData nodeData = saleList.TNode2NodeData(itemNode);
+						var itemName = itemNode.data as string;
 						TradePrice salePrice = TradeWindowFields.priceDef.GetItemPrice(nodeData.ItemName, nodeData.Rate).SalePrice;
 						var finalPrice = TradeWindowFields.iData.ScaleSalePrice(salePrice.Value, nodeData.ItemName);
 						if (finalPrice < 1)
 						{
 							TradeWindowFields.ignoreItemsList.Add(nodeData.ItemName);
+						}
+						// While we're at it, also sort the items in each folder by name
+						if (j > 0)
+                        {
+							int k = j;
+							do
+							{
+								TreeNode prevNode = folder.GetChildAt(--k);
+								var prevItemName = prevNode.data as string;
+								if (string.Compare(itemName, prevItemName) < 0) folder.SwapChildren(itemNode, prevNode);
+							} while (k > 0);
 						}
 					}
 				}
@@ -144,7 +156,7 @@ namespace YaogUI
             // Meh... this can be simplified but w/e
             var callbacks = new List<Func<UI_TradeItem, bool>>
             {
-                item => item.m_typename.text == "ItemType" || item.m_itemname.text.ToLower().Contains(searchText.ToLower())
+                item => item.m_itemname.text.ToLower().Contains(searchText.ToLower())
             };
             if (TradeWindowFields.ignoreWorthlessItems)
             {
@@ -185,15 +197,11 @@ namespace YaogUI
 				searchInput.y = list.y - 40;
 				searchInput.width = list.width;
 
-				searchInput.onKeyDown.Add(e => { FilterBuyList(); });
+				searchInput.onKeyDown.Add(e => FilterBuyList());
 				tradeWindow.onRemovedFromStage.Add(e => ClearBuySearch());
 				clearSearchBtn.onClick.Add(e => ClearBuySearch());
-				// Auto-clear search when 
-				tradeWindow.UIInfo.m_n51.onClickItem.Add(e =>
-				{
-					//ClearBuySearch(searchInput.text);
-					FilterBuyList();
-				});
+				// Search again when switching schools since items have changed
+				tradeWindow.UIInfo.m_n51.onClickItem.Add(e => FilterBuyList());
 
 				tradeWindow.UIInfo.AddChild(searchInput);
 			}
@@ -215,7 +223,7 @@ namespace YaogUI
 			// Meh... this can be simplified but w/e
 			var callbacks = new List<Func<UI_TradeItem, bool>>
 			{
-				item => item.m_typename.text == "ItemType" || item.m_itemname.text.ToLower().Contains(searchText.ToLower())
+				item => item.m_itemname.text.ToLower().Contains(searchText.ToLower())
 			};
 			if (TradeWindowFields.ignoreWorthlessItems)
 			{
