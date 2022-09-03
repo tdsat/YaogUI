@@ -151,14 +151,14 @@ namespace YaogUI
             var items			= list.GetChildren();
             var searchText		= tradeWindow.UIInfo.GetChild(TradeWindowFields.SellSearchInput).text;
             var categoryPanel	= (UI_TradeCategoryList)tradeWindow.UIInfo.GetChild(TradeWindowFields.CategoryPanel);
-			var ignoreWorthlessItemsCheckbox = categoryPanel.m_hideWorthlessCheckbox.selected;
+			var ignoreWorthlessItems = categoryPanel.m_hideWorthlessCheckbox.selected;
 
             // Meh... this can be simplified but w/e
             var callbacks = new List<Func<UI_TradeItem, bool>>
             {
                 item => item.m_itemname.text.ToLower().Contains(searchText.ToLower())
             };
-            if (TradeWindowFields.ignoreWorthlessItems)
+            if (ignoreWorthlessItems)
             {
                 callbacks.Add(item => !TradeWindowFields.ignoreItemsList.Contains(item.name));
             }
@@ -211,49 +211,18 @@ namespace YaogUI
 			}
 		}
 
-		public static void FilterSellList()
-		{
-			var tradeWindow = Wnd_SchoolTrade.Instance;
-			var list = tradeWindow.UIInfo.m_rightitem;
-			var items = list.GetChildren();
-			var searchText = tradeWindow.UIInfo.GetChild(TradeWindowFields.SellSearchInput).text;
-			var categoryPanel = (UI_TradeCategoryList)tradeWindow.UIInfo.GetChild(TradeWindowFields.CategoryPanel);
-			var ignoreWorthlessItemsCheckbox = categoryPanel.m_hideWorthlessCheckbox.selected;
-
-			// Meh... this can be simplified but w/e
-			var callbacks = new List<Func<UI_TradeItem, bool>>
-			{
-				item => item.m_itemname.text.ToLower().Contains(searchText.ToLower())
-			};
-			if (TradeWindowFields.ignoreWorthlessItems)
-			{
-				callbacks.Add(item => !TradeWindowFields.ignoreItemsList.Contains(item.name));
-			}
-
-			foreach (UI_TradeItem item in items)
-			{
-				item.visible = callbacks.TrueForAll(x => x(item));
-			}
-		}
-
 		public static void FilterBuyList()
 		{
 			var tradeWindow = Wnd_SchoolTrade.Instance;
 			var list = tradeWindow.UIInfo.m_leftitem;
 			var items = list.GetChildren();
 			var searchText = tradeWindow.UIInfo.GetChild(TradeWindowFields.BuySearchInput).text;
+			Main.Debug(searchText);
 
 			foreach (UI_TradeItem item in items)
 			{
 				item.visible = item.m_typename.text == "ItemType" || item.m_itemname.text.ToLower().Contains(searchText.ToLower());
 			}
-		}
-
-		private static void ClearSellSearch()
-		{
-			var searchField = Wnd_SchoolTrade.Instance.UIInfo.GetChild(TradeWindowFields.SellSearchInput);
-			searchField.text = "";
-			FilterSellList();
 		}
 
 		private static void ClearBuySearch(string searchText = "")
