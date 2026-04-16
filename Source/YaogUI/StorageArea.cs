@@ -2,12 +2,7 @@
 using FairyGUI;
 using HarmonyLib;
 using XiaWorld.UI.InGame;
-using System.Collections.Generic;
 using XiaWorld;
-using XiaWorld.ThingStep;
-using System.Linq;
-using KTV;
-using UnityEngine;
 
 namespace YaogUI
 {
@@ -41,7 +36,7 @@ namespace YaogUI
     }
 
     [HarmonyPatch(typeof(Wnd_StorageArea), "OnInit")]
-    public static class TestShit
+    public static class AddCtrlModifiersToClickHandler // This class name makes no sense...
     {
         public static void Postfix(Wnd_StorageArea __instance)
         {
@@ -51,14 +46,14 @@ namespace YaogUI
                 var buttons = Traverse.Create(Wnd_StorageArea.Instance).Field("bnts").GetValue<GButton[]>();
 
                 // Clear all button
-                var clearAll = UIPackage.CreateObjectFromURL("ui://ncbwb41mv9j6ah");
-                clearAll.name = "YaogUI.ClearAll";
-                clearAll.text = TFMgr.Get("全部清除");
-                clearAll.x = UI.m_n25.x + (UI.m_n25.width - clearAll.width)/2; //Trying to centre this thing is the hardest part...
-                clearAll.y = UI.m_n25.y;
-                clearAll.visible = true;
-                clearAll.onClick.Add(ClearAllItems);
-                UI.AddChild(clearAll);
+                var toggleItems = UIPackage.CreateObjectFromURL("ui://ncbwb41mv9j6ah");
+                toggleItems.name = "YaogUI.ToggleItems";
+                toggleItems.text = TFMgr.Get("全部切换");
+                toggleItems.x = UI.m_n25.x + (UI.m_n25.width - toggleItems.width)/2; //Trying to centre this thing is the hardest part...
+                toggleItems.y = UI.m_n25.y;
+                toggleItems.visible = true;
+                toggleItems.onClick.Add(ToggleAll);
+                UI.AddChild(toggleItems);
 
                 // Ctrl+Click disables all elements except for the selected one
                 for (var elementIdx = 0; elementIdx < buttons.Length; elementIdx++)
@@ -92,14 +87,30 @@ namespace YaogUI
                 Main.Debug(e.ToString());
             }
         }
-
-        public static void ClearAllItems()
+        
+        public static void ToggleAll()
+        {
+            var toggle = (StorageAreaHelper.UI.m_n25.GetChildAt(0) as UI_Item_Storage).m_title.selected;
+            SetAllItems(!toggle);
+        }
+        public static void SetAllItems(bool selected)
         {
             for (g_emItemKind groupIndex = g_emItemKind.None; groupIndex < g_emItemKind.Count; ++groupIndex)
             {
                 var group =
-                    Wnd_StorageArea.Instance.UIInfo.m_n25.GetChildAt((int)groupIndex) as UI_Item_Storage;
-                group.m_title.selected = false;
+                    StorageAreaHelper.UI.m_n25.GetChildAt((int)groupIndex) as UI_Item_Storage;
+                group.m_title.selected = selected;
+                group.m_title.onClick.Call();
+            }
+        }
+
+        public static void SelectAll()
+        {
+            for (g_emItemKind groupIndex = g_emItemKind.None; groupIndex < g_emItemKind.Count; ++groupIndex)
+            {
+                var group =
+                    StorageAreaHelper.UI.m_n25.GetChildAt((int)groupIndex) as UI_Item_Storage;
+                group.m_title.selected = true;
                 group.m_title.onClick.Call();
             }
         }

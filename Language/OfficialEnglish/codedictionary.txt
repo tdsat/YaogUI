@@ -1,4 +1,4 @@
 Key	Value
 明确	Clear
 全部清除	Clear all
-
+全部切换	Toggle all
