@@ -1,2 +1,4 @@
 Key	Value
 明确	Clear
+全部清除	Clear all
+
