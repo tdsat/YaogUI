@@ -6,6 +6,7 @@ using HarmonyLib;
 using JetBrains.Annotations;
 using XiaWorld.UI.InGame;
 using XiaWorld;
+using UnityEngine;
 
 namespace YaogUI
 {
@@ -13,13 +14,14 @@ namespace YaogUI
     {
         public string Name;
         public string Priority;
-        public List<string> Kinds = new List<string>();
-        public List<string> Labels = new List<string>(); //This is not used anywhere atm, but we'll keep it just in case
+        public List<g_emItemLable> Kinds = new List<g_emItemLable>(); //This is not used anywhere atm, but we'll keep it just in case
+        public List<g_emItemLable> Labels = new List<g_emItemLable>();
         public List<string> Qualities = new List<string>();
         public List<string> Elements = new List<string>();
-        public bool onlyFSItem = false;
-        public bool CanSale = false;
-        public bool onlyBigFish = false;
+        public int[] Tier = { 1, 12 };
+        public bool onlyFSItem;
+        public bool CanSale;
+        public bool onlyBigFish;
 
         public static bool GetTruthyValue([CanBeNull] string value)
         {
@@ -27,17 +29,101 @@ namespace YaogUI
             if (value.Length == 0) return false;
             return value == "true" || value == "1" || value == "yes";
         }
+
+        public void ApplyPresetToArea(AreaStorage area)
+        {
+            // Item
+            area.ExcludeItemLable.Clear();
+            area.IncludeItemQ = new bool[5];
+            // Original has 7 elements for some reason so we keep it that way
+            area.IncludeElement = new[]
+            {
+                true,
+                true,
+                true,
+                true,
+                true,
+                true,
+                true
+            };
+            foreach (var gEmItemLable in Labels)
+            {
+                area.ExcludeItemLable.Add((int) gEmItemLable);
+            }
+            // Priority
+            switch (Priority.ToLower())
+            {
+                case "high":
+                case "2":
+                    area.Priority = 2;
+                    break;
+                case "low":
+                case "0":
+                    area.Priority = 0;
+                    break;
+                default:
+                    area.Priority = 1;
+                    break;
+            }
+            // Quality
+            area.IncludeItemQ[0] = Qualities.Contains("Poor");
+            area.IncludeItemQ[1] = Qualities.Contains("Common");
+            area.IncludeItemQ[2] = Qualities.Contains("Excellent");
+            area.IncludeItemQ[3] = Qualities.Contains("Exquisite");
+            area.IncludeItemQ[4] = Qualities.Contains("None");
+            // Tier
+            area.IncludeItemRate = new Vector2(Tier[0], Tier[1]);
+            // Elements
+            area.IncludeElement[0] = Elements.Contains("None");
+            area.IncludeElement[1] = Elements.Contains("Metal");
+            area.IncludeElement[2] = Elements.Contains("Wood");
+            area.IncludeElement[3] = Elements.Contains("Water");
+            area.IncludeElement[4] = Elements.Contains("Fire");
+            area.IncludeElement[5] = Elements.Contains("Earth");
+            // Misc
+            area.onlyBigFish = onlyBigFish;
+            area.CanSale = CanSale;
+            area.onlyFSItem = onlyFSItem;
+        }
+    }
+
+    public class StorageAreaSettings
+    {
+        public List<g_emItemLable> ExcludeItemLables;
+        public Vector2 IncludeItemRate = new Vector2(0.0f, 12f);
+        public bool[] IncludeElement = new bool[7]
+        {
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+        };
+        public HashSet<int> ExcludeItemLable = new HashSet<int>();
+        public int Priority;
+        public bool[] IncludeItemQ = new bool[5]
+        {
+            true,
+            true,
+            true,
+            true,
+            true
+        };
     }
 
     public static class StorageAreaHelper
     {
         public static readonly string defaultPresetXMLName = "default_presets.xml";
         public static readonly string userPresetXMLName = "custom_presets.xml";
+        
+        public static Wnd_StorageArea window;
         public static List<StoragePreset> presets = new List<StoragePreset>();
 
         public static List<StoragePreset> LoadPresets(string filename)
         {
-            var xmlDoc = XmlLoader.ReadXmlFile("../" + filename);
+            var xmlDoc = XmlLoader.ReadXmlFile(filename);
             if (xmlDoc == null)
             {
                 throw new Exception(filename + " not found or failed to load");
@@ -60,10 +146,10 @@ namespace YaogUI
 
                 foreach (XmlNode kindNode in presetNode.SelectNodes("Kind"))
                 {
-                    preset.Kinds.Add(kindNode.Attributes["name"]?.Value); //Not used anywhere atm
+                    // preset.Kinds.Add())); //Not used anywhere atm
                     foreach (XmlNode labelNode in kindNode.SelectNodes("Label"))
                     {
-                        preset.Labels.Add(labelNode.InnerText);
+                        preset.Labels.Add((g_emItemLable) Enum.Parse(typeof(g_emItemLable), labelNode.InnerText));
                     }
                 }
 
@@ -72,6 +158,22 @@ namespace YaogUI
                     foreach (XmlNode labelNode in qualityNode.SelectNodes("Label"))
                     {
                         preset.Qualities.Add(labelNode.InnerText);
+                    }
+                }
+
+                XmlNode tierNode = presetNode.SelectSingleNode("Tier");
+                if (tierNode != null)
+                {
+                    var minAttr = tierNode.Attributes["min"];
+                    if (minAttr != null)
+                    {
+                        int.TryParse(minAttr.Value, out preset.Tier[0]);
+                    }
+
+                    var maxAttr = tierNode.Attributes["max"];
+                    if (maxAttr != null)
+                    {
+                        int.TryParse(maxAttr.Value, out preset.Tier[1]);
                     }
                 }
 
@@ -152,6 +254,15 @@ namespace YaogUI
         }
     }
 
+    [HarmonyPatch(typeof(Wnd_StorageArea), "OnShowUpdate")]
+    public static class InitWndStorageAreaPatch
+    {
+        public static void Prefix(Wnd_StorageArea __instance)
+        {
+            StorageAreaHelper.window = __instance;
+        }
+    }
+    
     [HarmonyPatch(typeof(Wnd_StorageArea), "OnInit")]
     public static class AddCtrlModifiersToClickHandler // This class name makes no sense...
     {
@@ -214,15 +325,32 @@ namespace YaogUI
         {
             try
             {
+                Main.Debug("Hello there general kenobbi!");
                 if (StorageAreaHelper.presets.Count == 0)
                 {
                     StorageAreaHelper.presets = StorageAreaHelper.LoadPresets(StorageAreaHelper.defaultPresetXMLName);
                 }
+                
+                var button = UIPackage.CreateObjectFromURL("ui://ncbwb41mv9j6ah");
+                var UI = StorageAreaHelper.UI;
+                button.name = "YaogUI.ApplyPreset";
+                button.text = "Apply Presets";
+                button.x = UI.m_n25.x + (UI.m_n25.width - button.width)/2;
+                button.y = UI.m_n25.y + 200;
+                button.visible = true;
+                button.onClick.Add(ApplyFiltersTest);
+                UI.AddChild(button);
             }
             catch (Exception e)
             {
                 Main.Debug(e.ToString());
             }
         }
+        public static void ApplyFiltersTest()
+        {
+            StorageAreaHelper.presets[0].ApplyPresetToArea(StorageAreaHelper.area);
+            StorageAreaHelper.window.ShowOrUpdate();
+        }
     }
+ 
 }

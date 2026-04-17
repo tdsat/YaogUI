@@ -47,7 +47,7 @@ namespace YaogUI
 
 				// Combine with the relative path to get the absolute path
 				string fullPath = Path.Combine(assemblyDir, relativePath);
-
+				Main.Debug($"Loading XML from {fullPath}");
 				if (!File.Exists(fullPath)) return null;
 				XmlDocument xmlDoc = new XmlDocument();
 				xmlDoc.Load(fullPath);
