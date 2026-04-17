@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Xml;
+using System.Linq;
 using FairyGUI;
 using HarmonyLib;
 using JetBrains.Annotations;
@@ -30,7 +31,7 @@ namespace YaogUI
             return value == "true" || value == "1" || value == "yes";
         }
 
-        public void ApplyPresetToArea(AreaStorage area)
+        public void ApplyToArea(AreaStorage area)
         {
             // Item
             area.ExcludeItemLable.Clear();
@@ -86,33 +87,6 @@ namespace YaogUI
             area.onlyFSItem = onlyFSItem;
         }
     }
-
-    public class StorageAreaSettings
-    {
-        public List<g_emItemLable> ExcludeItemLables;
-        public Vector2 IncludeItemRate = new Vector2(0.0f, 12f);
-        public bool[] IncludeElement = new bool[7]
-        {
-            true,
-            true,
-            true,
-            true,
-            true,
-            true,
-            true
-        };
-        public HashSet<int> ExcludeItemLable = new HashSet<int>();
-        public int Priority;
-        public bool[] IncludeItemQ = new bool[5]
-        {
-            true,
-            true,
-            true,
-            true,
-            true
-        };
-    }
-
     public static class StorageAreaHelper
     {
         public static readonly string defaultPresetXMLName = "default_presets.xml";
@@ -133,11 +107,25 @@ namespace YaogUI
             var root = xmlDoc.SelectSingleNode("Presets");
             if (root == null) throw new Exception(filename + " failed to load or malformed");
 
+            var index = 0;
             foreach (XmlNode presetNode in root.SelectNodes("Preset"))
             {
+                // Names should be unique but...
+                ++index;
+                var originalName = presetNode.Attributes["name"]?.Value;
+                string name = originalName;
+                if (originalName == null) name = $"Preset {index}";
+                else
+                {
+                    if (presets.Select(p => p.Name).Contains(originalName))
+                    {
+                        name = $"{originalName} {index}";
+                    }
+                }
+                
                 var preset = new StoragePreset
                 {
-                    Name = presetNode.Attributes["name"]?.Value,
+                    Name = name,
                     Priority = presetNode.Attributes["priority"]?.Value,
                     CanSale = StoragePreset.GetTruthyValue(presetNode.Attributes["CanSale"]?.Value),
                     onlyFSItem = StoragePreset.GetTruthyValue(presetNode.Attributes["RelicsOnly"]?.Value),
@@ -187,6 +175,7 @@ namespace YaogUI
 
                 presets.Add(preset);
             }
+            Main.Debug("Loaded " + presets.Count + " presets");
 
             return presets;
         }
@@ -328,18 +317,41 @@ namespace YaogUI
                 Main.Debug("Hello there general kenobbi!");
                 if (StorageAreaHelper.presets.Count == 0)
                 {
+                    Main.Debug("Loading presets...");
                     StorageAreaHelper.presets = StorageAreaHelper.LoadPresets(StorageAreaHelper.defaultPresetXMLName);
                 }
                 
-                var button = UIPackage.CreateObjectFromURL("ui://ncbwb41mv9j6ah");
                 var UI = StorageAreaHelper.UI;
-                button.name = "YaogUI.ApplyPreset";
-                button.text = "Apply Presets";
-                button.x = UI.m_n25.x + (UI.m_n25.width - button.width)/2;
-                button.y = UI.m_n25.y + 200;
-                button.visible = true;
-                button.onClick.Add(ApplyFiltersTest);
-                UI.AddChild(button);
+                // Creating this combobox is a pain in the ass...
+                var cBox = UI_ComboBox.CreateInstance();
+                cBox.x = UI.m_n25.x + (UI.m_n25.width - cBox.width);
+                cBox.y = UI.m_n25.y;
+                // Values
+                cBox.values = new string[StorageAreaHelper.presets.Count + 1];
+                cBox.items = new string[StorageAreaHelper.presets.Count + 1];
+                cBox.items[0] = TFMgr.Get("选择预设");
+                cBox.values[0] = "-1";
+                cBox.value = "-1";
+                cBox.selectedIndex = 0;
+         
+                for (var i = 0; i < StorageAreaHelper.presets.Count; i++)
+                {
+                    cBox.values[i + 1] = i.ToString();
+                    cBox.items[i + 1] = StorageAreaHelper.presets[i].Name;
+                }
+                
+                Main.Debug("Loaded " + cBox.values.Length + " values");
+                Main.Debug("Loaded " + cBox.items.Length + " items");
+                cBox.onChanged.Add(e =>
+                {
+                    int.TryParse(cBox.value, out var index);
+                    if (index == -1) return;
+                    
+                    ApplyPreset(StorageAreaHelper.presets[index]);
+                    cBox.value = "-1";
+                });
+     
+                UI.AddChild(cBox);
             }
             catch (Exception e)
             {
@@ -348,7 +360,12 @@ namespace YaogUI
         }
         public static void ApplyFiltersTest()
         {
-            StorageAreaHelper.presets[0].ApplyPresetToArea(StorageAreaHelper.area);
+            StorageAreaHelper.presets[0].ApplyToArea(StorageAreaHelper.area);
+            StorageAreaHelper.window.ShowOrUpdate();
+        }
+        public static void ApplyPreset(StoragePreset preset)
+        {
+            preset.ApplyToArea(StorageAreaHelper.area);
             StorageAreaHelper.window.ShowOrUpdate();
         }
     }
