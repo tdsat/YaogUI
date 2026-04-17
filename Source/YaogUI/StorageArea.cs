@@ -33,6 +33,40 @@ namespace YaogUI
             UI.m_nq4,
         };
 
+        public static void ToggleAll()
+        {
+            var toggle = (UI.m_n25.GetChildAt(0) as UI_Item_Storage).m_title.selected;
+            SetAllItems(!toggle);
+        }
+
+        public static void SetAllItems(bool selected)
+        {
+            for (g_emItemKind groupIndex = g_emItemKind.None; groupIndex < g_emItemKind.Count; ++groupIndex)
+            {
+                var group =
+                    UI.m_n25.GetChildAt((int)groupIndex) as UI_Item_Storage;
+                group.m_title.selected = selected;
+                group.m_title.onClick.Call();
+            }
+        }
+
+        public static void ClearAllElements()
+        {
+            foreach (var button in buttons)
+            {
+                button.selected = false;
+                button.onChanged.Call();
+            }
+        }
+
+        public static void ClearAllQuality()
+        {
+            StorageAreaHelper.area.IncludeItemQ = new bool[5];
+            foreach (var uiCheckbox in StorageAreaHelper.qualityCheckboxList)
+            {
+                uiCheckbox.selected = false;
+            }
+        }
     }
 
     [HarmonyPatch(typeof(Wnd_StorageArea), "OnInit")]
@@ -52,7 +86,7 @@ namespace YaogUI
                 toggleItems.x = UI.m_n25.x + (UI.m_n25.width - toggleItems.width)/2; //Trying to centre this thing is the hardest part...
                 toggleItems.y = UI.m_n25.y;
                 toggleItems.visible = true;
-                toggleItems.onClick.Add(ToggleAll);
+                toggleItems.onClick.Add(StorageAreaHelper.ToggleAll);
                 UI.AddChild(toggleItems);
 
                 // Ctrl+Click disables all elements except for the selected one
@@ -60,10 +94,10 @@ namespace YaogUI
                 {
                     var gButton = buttons[elementIdx];
                     var index = elementIdx;
-                    gButton.onClick.Add((e) =>
+                    gButton.onClick.Add(e =>
                     {
                         if (!e.inputEvent.ctrl) return;
-                        ClearAllElements();
+                        StorageAreaHelper.ClearAllElements();
                         gButton.selected = true;
                         gButton.onChanged.Call();
                         Main.Debug(index.ToString());
@@ -74,10 +108,10 @@ namespace YaogUI
                 for (int i = 0; i < StorageAreaHelper.qualityCheckboxList.Length; i++)
                 {
                     var checkbox = StorageAreaHelper.qualityCheckboxList[i];
-                    checkbox.onClick.Add((e) =>
+                    checkbox.onClick.Add(e =>
                     {
                         if (!e.inputEvent.ctrl) return;
-                        ClearAllQuality();
+                        StorageAreaHelper.ClearAllQuality();
                         checkbox.selected = true;
                     });
                 }
@@ -85,51 +119,6 @@ namespace YaogUI
             catch (Exception e)
             {
                 Main.Debug(e.ToString());
-            }
-        }
-        
-        public static void ToggleAll()
-        {
-            var toggle = (StorageAreaHelper.UI.m_n25.GetChildAt(0) as UI_Item_Storage).m_title.selected;
-            SetAllItems(!toggle);
-        }
-        public static void SetAllItems(bool selected)
-        {
-            for (g_emItemKind groupIndex = g_emItemKind.None; groupIndex < g_emItemKind.Count; ++groupIndex)
-            {
-                var group =
-                    StorageAreaHelper.UI.m_n25.GetChildAt((int)groupIndex) as UI_Item_Storage;
-                group.m_title.selected = selected;
-                group.m_title.onClick.Call();
-            }
-        }
-
-        public static void SelectAll()
-        {
-            for (g_emItemKind groupIndex = g_emItemKind.None; groupIndex < g_emItemKind.Count; ++groupIndex)
-            {
-                var group =
-                    StorageAreaHelper.UI.m_n25.GetChildAt((int)groupIndex) as UI_Item_Storage;
-                group.m_title.selected = true;
-                group.m_title.onClick.Call();
-            }
-        }
-
-        public static void ClearAllElements()
-        {
-            foreach (var button in StorageAreaHelper.buttons)
-            {
-                button.selected = false;
-                button.onChanged.Call();
-            }
-        }
-
-        public static void ClearAllQuality()
-        {
-            StorageAreaHelper.area.IncludeItemQ = new bool[5];
-            foreach (var uiCheckbox in StorageAreaHelper.qualityCheckboxList)
-            {
-                uiCheckbox.selected = false;
             }
         }
     }
