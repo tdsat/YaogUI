@@ -24,7 +24,7 @@ namespace YaogUI
 			}
 			catch (Exception e)
 			{
-				KLog.Dbg("[YaogUI] error" + e.ToString(), new object[0]);
+				Main.Debug(e.ToString());
 			}
 		}
 	}
@@ -108,7 +108,7 @@ namespace YaogUI
 			}
 			catch (Exception e)
 			{
-				KLog.Dbg("[YaogUI] error" + e.ToString(), new object[0]);
+				Main.Debug(e.ToString());
 			}
 		}
 

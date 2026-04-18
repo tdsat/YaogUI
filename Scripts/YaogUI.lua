@@ -26,10 +26,6 @@ function YaogUI:OnInit()
 	tbEventMod:RegisterEvent(g_emEvent.NpcHealthChanged, self.ClearMessageIfHealthy, self)
 end
 
-function YaogUI:OnEnter()
-	print("YaogUI Entered");
-end
-
 function FilterList(list, needle, searchTextCb)
 	local Items = list:GetChildren();
 	needle = needle:lower();

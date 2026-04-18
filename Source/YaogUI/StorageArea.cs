@@ -39,8 +39,7 @@ namespace YaogUI
             // Original has 7 elements for some reason, so we keep it that way
             area.IncludeElement = new bool[7];
             area.Priority = 1;
-            //Items
-            // There has to be a better way to do this :/
+            //Items - There has to be a better way to do this :/
             foreach (g_emItemLable label in Enum.GetValues(typeof(g_emItemLable)))
             {
                 if (Labels.Contains(label)) continue;
