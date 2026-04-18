@@ -15,7 +15,6 @@ namespace YaogUI
     {
         public string Name;
         public string Priority = "Normal";
-        public List<g_emItemLable> Kinds = new List<g_emItemLable>(); //This is not used anywhere atm, but we'll keep it just in case
         public List<g_emItemLable> Labels = new List<g_emItemLable>();
         public List<string> Qualities = new List<string> { "Poor", "Common", "Excellent", "Exquisite", "None" };
         public List<string> Elements = new List<string> { "None", "Metal", "Wood", "Water", "Fire", "Earth" };
@@ -102,11 +101,14 @@ namespace YaogUI
                 throw new Exception(filename + " not found or failed to load");
             }
 
-            var root = xmlDoc.SelectSingleNode("Presets");
+            XmlNamespaceManager nsmgr = new XmlNamespaceManager(xmlDoc.NameTable);
+            nsmgr.AddNamespace("ns", "YaogUI");
+
+            var root = xmlDoc.SelectSingleNode("//ns:Presets", nsmgr);
             if (root == null) throw new Exception(filename + " failed to load or malformed");
 
             var index = 0;
-            foreach (XmlNode presetNode in root.SelectNodes("Preset"))
+            foreach (XmlNode presetNode in root.SelectNodes("ns:Preset", nsmgr))
             {
                 // Names should be unique but...
                 ++index;
@@ -131,31 +133,34 @@ namespace YaogUI
                 };
                 
                 // Parse Kinds (Items categories)
-                XmlNode kindNode = presetNode.SelectSingleNode("Kind");
+                XmlNode kindNode = presetNode.SelectSingleNode("ns:Kind", nsmgr);
                 if (kindNode != null)
                 {
-                    foreach (XmlNode labelNode in kindNode.SelectNodes("Label"))
+                    foreach (XmlNode labelNode in kindNode.SelectNodes("ns:Label", nsmgr))
                     {
                         preset.Labels.Add((g_emItemLable) Enum.Parse(typeof(g_emItemLable), labelNode.InnerText));
                     }
                 }
                 else
                 {
-                    preset.Labels = Enum.GetValues(typeof(g_emItemLable)).Cast<g_emItemLable>().ToList();
+                    foreach (g_emItemLable label in Enum.GetValues(typeof(g_emItemLable)))
+                    {
+                        preset.Labels.Add(label);
+                    }
                 }
 
-                XmlNode qualityNode = presetNode.SelectSingleNode("Quality");
+                XmlNode qualityNode = presetNode.SelectSingleNode("ns:Quality", nsmgr);
                 if (qualityNode != null)
                 {
                     preset.Qualities.Clear();
-                    foreach (XmlNode labelNode in qualityNode.SelectNodes("Label"))
+                    foreach (XmlNode labelNode in qualityNode.SelectNodes("ns:Label", nsmgr))
                     {
                         preset.Qualities.Add(labelNode.InnerText);
                     }
                 }
 
                 // Parse Tier settings
-                XmlNode tierNode = presetNode.SelectSingleNode("Tier");
+                XmlNode tierNode = presetNode.SelectSingleNode("ns:Tier", nsmgr);
                 if (tierNode != null)
                 {
                     var minAttr = tierNode.Attributes["min"];
@@ -172,11 +177,11 @@ namespace YaogUI
                 }
 
                 // Parse Element settings
-                XmlNode elementNode = presetNode.SelectSingleNode("Elements");
+                XmlNode elementNode = presetNode.SelectSingleNode("ns:Elements", nsmgr);
                 if (elementNode != null)
                 {
                     preset.Elements.Clear();
-                    foreach (XmlNode labelNode in elementNode.SelectNodes("Label"))
+                    foreach (XmlNode labelNode in elementNode.SelectNodes("ns:Label", nsmgr))
                     {
                         preset.Elements.Add(labelNode.InnerText);
                     }

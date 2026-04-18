@@ -52,7 +52,6 @@ namespace YaogUI
 				XmlDocument xmlDoc = new XmlDocument();
 				xmlDoc.Load(fullPath);
 				return xmlDoc;
-
 			}
 			catch (Exception e)
 			{
