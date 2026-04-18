@@ -39,27 +39,30 @@ namespace YaogUI
             // Original has 7 elements for some reason, so we keep it that way
             area.IncludeElement = new bool[7];
             area.Priority = 1;
-            
             //Items
+            // There has to be a better way to do this :/
             foreach (g_emItemLable label in Enum.GetValues(typeof(g_emItemLable)))
             {
                 if (Labels.Contains(label)) continue;
                 area.ExcludeItemLable.Add((int) label);
             }
             // Priority
-            switch (Priority.ToLower())
+            if (!string.IsNullOrEmpty(Priority))
             {
-                case "high":
-                case "2":
-                    area.Priority = 2;
-                    break;
-                case "low":
-                case "0":
-                    area.Priority = 0;
-                    break;
-                default:
-                    area.Priority = 1;
-                    break;
+                switch (Priority.ToLower())
+                {
+                    case "high":
+                    case "2":
+                        area.Priority = 2;
+                        break;
+                    case "low":
+                    case "0":
+                        area.Priority = 0;
+                        break;
+                    default:
+                        area.Priority = 1;
+                        break;
+                }
             }
             // Quality
             area.IncludeItemQ[0] = Qualities.Contains("Poor");
@@ -80,6 +83,7 @@ namespace YaogUI
             area.onlyBigFish = onlyBigFish;
             area.CanSale = CanSale;
             area.onlyFSItem = onlyFSItem;
+            
         }
     }
     public static class StorageAreaHelper
@@ -92,13 +96,13 @@ namespace YaogUI
 
         public static List<StoragePreset> LoadPresets(string filename)
         {
+            var loaded = new List<StoragePreset>();
             var xmlDoc = XmlLoader.ReadXmlFile(filename);
             if (xmlDoc == null)
             {
                 throw new Exception(filename + " not found or failed to load");
             }
 
-            presets.Clear();
             var root = xmlDoc.SelectSingleNode("Presets");
             if (root == null) throw new Exception(filename + " failed to load or malformed");
 
@@ -112,7 +116,7 @@ namespace YaogUI
                 if (originalName == null) name = $"Preset {index}";
                 else
                 {
-                    if (presets.Select(p => p.Name).Contains(originalName))
+                    if (loaded.Select(p => p.Name).Contains(originalName))
                     {
                         name = $"{originalName} {index}";
                     }
@@ -179,11 +183,11 @@ namespace YaogUI
                     }
                 }
 
-                presets.Add(preset);
+                loaded.Add(preset);
             }
-            Main.Debug("Loaded " + presets.Count + " presets");
+            Main.Debug("Loaded " + loaded.Count + " presets");
 
-            return presets;
+            return loaded;
         }
 
         public static AreaStorage area =>
@@ -283,14 +287,12 @@ namespace YaogUI
                 for (var elementIdx = 0; elementIdx < buttons.Length; elementIdx++)
                 {
                     var gButton = buttons[elementIdx];
-                    var index = elementIdx;
                     gButton.onClick.Add(e =>
                     {
                         if (!e.inputEvent.ctrl) return;
                         StorageAreaHelper.ClearAllElements();
                         gButton.selected = true;
                         gButton.onChanged.Call();
-                        Main.Debug(index.ToString());
                     });
                 }
 
@@ -327,40 +329,15 @@ namespace YaogUI
                 }
                 
                 var UI = StorageAreaHelper.UI;
-                // Creating this combobox is a pain in the ass...
-                var cBox = UI_ComboBox.CreateInstance();
-                cBox.x = UI.m_n25.x + (UI.m_n25.width - cBox.width);
-                cBox.y = UI.m_n25.y;
-                // Values
-                cBox.values = new string[StorageAreaHelper.presets.Count + 1];
-                cBox.items = new string[StorageAreaHelper.presets.Count + 1];
-                cBox.items[0] = TFMgr.Get("选择预设");
-                cBox.values[0] = "-1";
-                cBox.value = "-1";
-         
-                for (var i = 0; i < StorageAreaHelper.presets.Count; i++)
-                {
-                    cBox.values[i + 1] = i.ToString();
-                    cBox.items[i + 1] = StorageAreaHelper.presets[i].Name;
-                }
+                var cBox = CreatePresetDropdown();
                 
-                cBox.onChanged.Add(e =>
-                {
-                    int.TryParse(cBox.value, out var index);
-                    if (index == -1) return;
-                    // Main.Debug($"Found preset {StorageAreaHelper.presets[index].Name} at index {index}");
-                    ApplyPreset(StorageAreaHelper.presets[index]);
-                    cBox.value = "-1";
-                });
-                
-                var reloadPresets = UI_Button.CreateInstance();
+                var reloadPresets = UIPackage.CreateObjectFromURL("ui://ncbwb41mv9j6ah");
                 reloadPresets.text = "Reload";
                 reloadPresets.tooltips = TFMgr.Get("从 XML 重新加载预设");
                 reloadPresets.x = cBox.x + cBox.width + 10;
                 reloadPresets.y = cBox.y;
-                reloadPresets.onClick.Add(LoadPresets);
+                reloadPresets.onClick.Add(ReloadPresets);
      
-                UI.AddChild(cBox);
                 UI.AddChild(reloadPresets);
             }
             catch (Exception e)
@@ -377,7 +354,62 @@ namespace YaogUI
 
         public static void LoadPresets()
         {
-            StorageAreaHelper.presets = StorageAreaHelper.LoadPresets(StorageAreaHelper.defaultPresetXMLName);
+            StorageAreaHelper.presets.Clear();
+            try
+            {
+                var userPresets = StorageAreaHelper.LoadPresets(StorageAreaHelper.userPresetXMLName);
+                var defaultPresets = StorageAreaHelper.LoadPresets(StorageAreaHelper.defaultPresetXMLName);
+                StorageAreaHelper.presets = userPresets.Concat(defaultPresets).ToList();
+            }
+            catch (Exception e)
+            {
+                Main.Debug("User preset not found, loading default preset instead");
+                StorageAreaHelper.presets = StorageAreaHelper.LoadPresets(StorageAreaHelper.defaultPresetXMLName);
+            }
+        }
+        
+        public static void ReloadPresets()
+        {
+            LoadPresets();
+            CreatePresetDropdown();
+        }
+
+        public static UI_ComboBox CreatePresetDropdown()
+        {
+            var UI = StorageAreaHelper.UI;
+            // Creating this combobox is a pain in the ass...
+            var cBox = UI_ComboBox.CreateInstance();
+            cBox.name = "YaogUI.PresetDropdown";
+            cBox.x = UI.m_n25.x + (UI.m_n25.width - cBox.width);
+            cBox.y = UI.m_n25.y;
+            // Values
+            cBox.values = new string[StorageAreaHelper.presets.Count + 1];
+            cBox.items = new string[StorageAreaHelper.presets.Count + 1];
+            cBox.items[0] = TFMgr.Get("选择预设");
+            cBox.values[0] = "-1";
+            cBox.value = "-1";
+
+            for (var i = 0; i < StorageAreaHelper.presets.Count; i++)
+            {
+                cBox.values[i + 1] = i.ToString();
+                cBox.items[i + 1] = StorageAreaHelper.presets[i].Name;
+            }
+                
+            cBox.onChanged.Add(e =>
+            {
+                int.TryParse(cBox.value, out var index);
+                if (index == -1) return;
+                ApplyPreset(StorageAreaHelper.presets[index]);
+                cBox.value = "-1";
+            });
+            
+            // Remove the old one if it exists. Not sure if there's a better way to do this...
+            if (UI.GetChild("YaogUI.PresetDropdown") != null) 
+                UI.RemoveChild(UI.GetChild("YaogUI.PresetDropdown"), true);
+            
+            UI.AddChild(cBox);
+
+            return cBox;
         }
     }
  
