@@ -1,4 +1,4 @@
-local TalismanPaint = GameMain:GetMod("TalismanPaint")
+local TalismanPaint = GameMain:GetMod("YaogUI.TalismanPaint")
 local Wnd_FuPatinter = CS.Wnd_FuPatinter.Instance;
 
  local function AddSearchInput()

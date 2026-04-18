@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema elementFormDefault="qualified"
+           targetNamespace="YaogUI"
+           xmlns="YaogUI storage_presets.xsd"
+           xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:element name="Presets">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="Preset" minOccurs="0" maxOccurs="unbounded">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                                <xs:element name="Kind" minOccurs="0" maxOccurs="unbounded">
+                                    <xs:complexType>
+                                        <xs:sequence>
+                                            <xs:element minOccurs="0" maxOccurs="unbounded" name="Label">
+                                                <xs:simpleType>
+                                                    <xs:restriction base="xs:string">
+                                                        <xs:enumeration value="None"/>
+                                                        <xs:enumeration value="Wood"/>
+                                                        <xs:enumeration value="WoodBlock"/>
+                                                        <xs:enumeration value="Rock"/>
+                                                        <xs:enumeration value="RockBlock"/>
+                                                        <xs:enumeration value="Metal"/>
+                                                        <xs:enumeration value="Plant"/>
+                                                        <xs:enumeration value="PlantProduct"/>
+                                                        <xs:enumeration value="Ingredient"/>
+                                                        <xs:enumeration value="Meat"/>
+                                                        <xs:enumeration value="Leather"/>
+                                                        <xs:enumeration value="Cloth"/>
+                                                        <xs:enumeration value="Bone"/>
+                                                        <xs:enumeration value="Weapon"/>
+                                                        <xs:enumeration value="FightFabao"/>
+                                                        <xs:enumeration value="TreasureFabao"/>
+                                                        <xs:enumeration value="Hat"/>
+                                                        <xs:enumeration value="Clothes"/>
+                                                        <xs:enumeration value="Trousers"/>
+                                                        <xs:enumeration value="Food"/>
+                                                        <xs:enumeration value="Drug"/>
+                                                        <xs:enumeration value="Dan"/>
+                                                        <xs:enumeration value="Spell"/>
+                                                        <xs:enumeration value="Tool"/>
+                                                        <xs:enumeration value="MetalBlock"/>
+                                                        <xs:enumeration value="Esoterica"/>
+                                                        <xs:enumeration value="LeftoverMaterial"/>
+                                                        <xs:enumeration value="SpellPaper"/>
+                                                        <xs:enumeration value="LingStone"/>
+                                                        <xs:enumeration value="Garbage"/>
+                                                        <xs:enumeration value="SoulCrystal"/>
+                                                        <xs:enumeration value="Treasure"/>
+                                                        <xs:enumeration value="Influence"/>
+                                                        <xs:enumeration value="SPStuffCategories"/>
+                                                        <xs:enumeration value="BambooBlock"/>
+                                                        <xs:enumeration value="Cape"/>
+                                                        <xs:enumeration value="Horse"/>
+                                                        <xs:enumeration value="Other"/>
+                                                    </xs:restriction>
+                                                </xs:simpleType>
+                                            </xs:element>
+                                        </xs:sequence>
+                                        <xs:attribute name="name" type="xs:string"/>
+                                    </xs:complexType>
+                                </xs:element>
+                                <xs:element name="Tier" minOccurs="0">
+                                    <xs:complexType>
+                                        <xs:attribute name="min">
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:float">
+                                                    <xs:minInclusive value="0"/>
+                                                    <xs:maxInclusive value="12"/>
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:attribute>
+                                        <xs:attribute name="max">
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:float">
+                                                    <xs:minInclusive value="0"/>
+                                                    <xs:maxInclusive value="12"/>
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:attribute>
+                                    </xs:complexType>
+                                </xs:element>
+                                <xs:element name="Quality">
+                                    <xs:complexType>
+                                        <xs:sequence>
+                                            <xs:element minOccurs="0" maxOccurs="unbounded" name="Label">
+                                                <xs:simpleType>
+                                                    <xs:restriction base="xs:string">
+                                                        <xs:enumeration value="Poor"/>
+                                                        <xs:enumeration value="Common"/>
+                                                        <xs:enumeration value="Excellent"/>
+                                                        <xs:enumeration value="Exquisite"/>
+                                                        <xs:enumeration value="None"/>
+                                                    </xs:restriction>
+                                                </xs:simpleType>
+                                            </xs:element>
+                                        </xs:sequence>
+                                    </xs:complexType>
+                                </xs:element>
+                                <xs:element name="Elements" maxOccurs="1">
+                                    <xs:complexType>
+                                        <xs:sequence>
+                                            <xs:element minOccurs="0" maxOccurs="unbounded" name="Label">
+                                                <xs:simpleType>
+                                                    <xs:restriction base="xs:string">
+                                                        <xs:enumeration value="None"/>
+                                                        <xs:enumeration value="Metal"/>
+                                                        <xs:enumeration value="Wood"/>
+                                                        <xs:enumeration value="Water"/>
+                                                        <xs:enumeration value="Fire"/>
+                                                        <xs:enumeration value="Earth"/>
+                                                    </xs:restriction>
+                                                </xs:simpleType>
+                                            </xs:element>
+                                        </xs:sequence>
+                                    </xs:complexType>
+                                </xs:element>
+                            </xs:choice>
+                        </xs:sequence>
+                  
+                        <xs:attribute name="name" type="xs:string" use="required"/>
+                        <xs:attribute name="priority">
+                            <xs:simpleType>
+                                <xs:restriction base="xs:string">
+                                    <xs:enumeration value="Low"/>
+                                    <xs:enumeration value="Normal"/>
+                                    <xs:enumeration value="High"/>
+                                </xs:restriction>
+                            </xs:simpleType>
+                        </xs:attribute>
+                        <xs:attribute name="onlyFSItem" type="xs:boolean"/>
+                        <xs:attribute name="CanSale" type="xs:boolean"/>
+                        <xs:attribute name="onlyBigFish" type="xs:boolean"/>
+                    </xs:complexType>
+                </xs:element>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+</xs:schema>

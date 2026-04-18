@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Presets xmlns="YaogUI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="YaogUI storage_presets.xsd">
+    <Preset name="Everything" priority="High" onlyFSItem="false" CanSale="true" onlyBigFish="false"> <!--  Low Normal High -->
+        <Tier min="0" max="12"/>
+<!-- Kind nodes don't need to be grouped, it's just done here for convenience
+ You can put all labels in one node-->
+        <Kind name="None">
+            <Label>Tool</Label>
+            <Label>Garbage</Label>
+            <Label>Other</Label>
+        </Kind>
+        <Kind name="Material">
+            <Label>Wood</Label>
+            <Label>WoodBlock</Label>
+            <Label>Rock</Label>
+            <Label>RockBlock</Label>
+            <Label>Metal</Label>
+            <Label>MetalBlock</Label>
+            <Label>Plant</Label>
+            <Label>PlantProduct</Label>
+            <Label>LeftoverMaterial</Label>
+            <Label>Leather</Label>
+            <Label>Cloth</Label>
+            <Label>Bone</Label>
+        </Kind>
+        <Kind name="Equipment">
+            <Label>Weapon</Label>
+            <Label>Cape</Label>
+            <Label>Clothes</Label>
+            <Label>Trousers</Label>
+            <Label>Treasure</Label>
+            <Label>Horse</Label>
+        </Kind>
+        <Kind name="Consumable">
+            <Label>Food</Label>
+            <Label>Meat</Label>
+            <Label>Ingredient</Label>
+            <Label>Drug</Label>
+        </Kind>
+        <Kind name="Practice">
+            <Label>SpellPaper</Label>
+            <Label>SoulCrystal</Label>
+            <Label>Spell</Label>
+            <Label>Dan</Label>
+            <Label>LingStone</Label>
+            <Label>Esoterica</Label>
+            <Label>FightFabao</Label>
+            <Label>TreasureFabao</Label>
+        </Kind>
+        <Quality>
+            <Label>Poor</Label>
+            <Label>Common</Label>
+            <Label>Excellent</Label>
+            <Label>Exquisite</Label>
+            <Label>None</Label>
+        </Quality>
+        <Quality>
+            <Label>Poor</Label>
+            <Label>Common</Label>
+            <Label>Excellent</Label>
+            <Label>Exquisite</Label>
+            <Label>None</Label>
+        </Quality>
+        <Elements>
+            <Label>None</Label>
+            <Label>Metal</Label>
+            <Label>Wood</Label>
+            <Label>Water</Label>
+            <Label>Fire</Label>
+            <Label>Earth</Label>
+        </Elements>
+    </Preset>
+</Presets>
+

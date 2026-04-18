@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Presets xmlns="YaogUI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="YaogUI storage_presets.xsd">
+<!--    Change this file to add custom presets. They will appear above the default ones-->
+<!--    <Preset name="Something" priority="High" CanSale="true">-->
+<!--        <Kind name="Equipment">-->
+<!--            <Label>Weapon</Label>-->
+<!--            <Label>Cape</Label>-->
+<!--            <Label>Clothes</Label>-->
+<!--            <Label>Trousers</Label>-->
+<!--            <Label>Treasure</Label>-->
+<!--            <Label>Horse</Label>-->
+<!--            <Label>Ingredient</Label>-->
+<!--        </Kind>-->
+<!--    </Preset>-->
+</Presets>
+

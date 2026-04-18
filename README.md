@@ -19,12 +19,22 @@ Releases can be downloaded from [NexusMods](https://www.nexusmods.com/amazingcul
 - Ability to search when crafting item
 - Talisman list also has a new look
 
+### Storage Filter Window
+- Button to toggle all item filters on/off
+- When you Ctrl+Click on the Element/Quality options, it disables all other options
+- Ability to create/load filter presets
+  - You can create custom presets by changing the `custom_presets.xml`
+
 ### Other
 - When a vessel dies, it name changes to '[Owner]'s Vessel' to make it easier to identify who owns it
 - 'X : Hurt' and 'X : injury deteriorating' messages get cleaned if the affected pawn get healed
-  - Experimental - Any feedback appreciated
+- Doubled the material selection columns when building
+- During adventures, when the NPC selection dialog appears, if there's only one NPC in the map they are auto-selected
 
 # Development
+
+> NOTE : The build project is no longer guaranteed to work out-of-box. I don't use Windows anymore and can't be bothered to test/fix it
+> It _should_ work, but might need some changes WRT to required assemblies etc.
 
 The `Source` folder (hopefully) contains everything related to this mod. You can safely remove that folder if you are not interested in development.
  
@@ -43,10 +53,10 @@ This is a non-exhaustive list that I plan to work on. I can't give any promises 
  - [ ] Pin common trade items to top of trade window (like Spirit Stones/Crystals etc)
  - [ ] Improve the inner disciples spell list
  - [ ] Make features optional through the UI
- - [ ] Add more options to the sidebar message configuration (eg "Ignore 'There is a fire' messages" etc)
+ - [ ] Add more options to the sidebar message configuration (e.g. "Ignore 'There is a fire' messages" etc)
 
  There are other changes that I would like to implement, like the ability to move items between storage spaces, but that is beyond my abilities for now.
 
- Also, new ideas are welcome but I can't promise anything.
+ Also, new ideas are welcome, but I can't promise anything.
 
  Feedback is always welcome!
