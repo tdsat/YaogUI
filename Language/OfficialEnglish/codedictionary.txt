@@ -3,4 +3,4 @@ Key	Value
 全部清除	Clear all
 全部切换	Toggle all
 选择预设	Select preset
-
+从 XML 重新加载预设	Reload preset from XML

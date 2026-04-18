@@ -1,5 +1,6 @@
 <Presets>
-    <Preset name="Everything" priority="Normal">  <!-- Low Normal High -->
+    <Preset name="Everything" priority="High" onlyFSItem="false" CanSale="true" onlyBigFish="false"> <!--  Low Normal High -->
+        <Tier min="0" max="12"/>
         <Kind name="None">
             <Label>Tool</Label>
             <Label>Garbage</Label>
@@ -50,14 +51,14 @@
             <Label>Exquisite</Label>
             <Label>None</Label>
         </Quality>
-        <Element>
+        <Elements>
             <Label>None</Label>
             <Label>Metal</Label>
             <Label>Wood</Label>
             <Label>Water</Label>
             <Label>Fire</Label>
             <Label>Earth</Label>
-        </Element>
+        </Elements>
     </Preset>
 </Presets>
 

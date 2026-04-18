@@ -64,14 +64,12 @@ namespace YaogUI
 				btn.onClick.Set(() => sellItemList.ScrollToView(0, true, true));
 				foreach (UI_TradeItem item in items)
 				{
+					if (item.name != "ItemType") continue;
 					var index = sellItemList.GetChildIndex(item);
-					if (item.name == "ItemType")
-					{
-						btn = (GButton)categoryList.AddItemFromPool();
-						btn.title = item.m_typename.text;
-						btn.height = 30;
-						btn.onClick.Set(() => sellItemList.ScrollToView(index, true, true));
-					}
+					btn = (GButton)categoryList.AddItemFromPool();
+					btn.title = item.m_typename.text;
+					btn.height = 30;
+					btn.onClick.Set(() => sellItemList.ScrollToView(index, true, true));
 				}
 				categoryPanel.x = sellItemList.x + sellItemList.width;
 				categoryPanel.y = sellItemList.y - 60;

@@ -14,12 +14,12 @@ namespace YaogUI
     public class StoragePreset
     {
         public string Name;
-        public string Priority;
+        public string Priority = "Normal";
         public List<g_emItemLable> Kinds = new List<g_emItemLable>(); //This is not used anywhere atm, but we'll keep it just in case
         public List<g_emItemLable> Labels = new List<g_emItemLable>();
-        public List<string> Qualities = new List<string>();
-        public List<string> Elements = new List<string>();
-        public int[] Tier = { 1, 12 };
+        public List<string> Qualities = new List<string> { "Poor", "Common", "Excellent", "Exquisite", "None" };
+        public List<string> Elements = new List<string> { "None", "Metal", "Wood", "Water", "Fire", "Earth" };
+        public float[] Tier = { 0f, 12f };
         public bool onlyFSItem;
         public bool CanSale;
         public bool onlyBigFish;
@@ -33,23 +33,18 @@ namespace YaogUI
 
         public void ApplyToArea(AreaStorage area)
         {
-            // Item
+            // Clear everything
             area.ExcludeItemLable.Clear();
             area.IncludeItemQ = new bool[5];
-            // Original has 7 elements for some reason so we keep it that way
-            area.IncludeElement = new[]
+            // Original has 7 elements for some reason, so we keep it that way
+            area.IncludeElement = new bool[7];
+            area.Priority = 1;
+            
+            //Items
+            foreach (g_emItemLable label in Enum.GetValues(typeof(g_emItemLable)))
             {
-                true,
-                true,
-                true,
-                true,
-                true,
-                true,
-                true
-            };
-            foreach (var gEmItemLable in Labels)
-            {
-                area.ExcludeItemLable.Add((int) gEmItemLable);
+                if (Labels.Contains(label)) continue;
+                area.ExcludeItemLable.Add((int) label);
             }
             // Priority
             switch (Priority.ToLower())
@@ -126,47 +121,58 @@ namespace YaogUI
                 var preset = new StoragePreset
                 {
                     Name = name,
-                    Priority = presetNode.Attributes["priority"]?.Value,
+                    Priority = presetNode.Attributes["Priority"]?.Value,
                     CanSale = StoragePreset.GetTruthyValue(presetNode.Attributes["CanSale"]?.Value),
                     onlyFSItem = StoragePreset.GetTruthyValue(presetNode.Attributes["RelicsOnly"]?.Value),
                     onlyBigFish = StoragePreset.GetTruthyValue(presetNode.Attributes["LargeFishOnly"]?.Value)
                 };
-
-                foreach (XmlNode kindNode in presetNode.SelectNodes("Kind"))
+                
+                // Parse Kinds (Items categories)
+                XmlNode kindNode = presetNode.SelectSingleNode("Kind");
+                if (kindNode != null)
                 {
-                    // preset.Kinds.Add())); //Not used anywhere atm
                     foreach (XmlNode labelNode in kindNode.SelectNodes("Label"))
                     {
                         preset.Labels.Add((g_emItemLable) Enum.Parse(typeof(g_emItemLable), labelNode.InnerText));
                     }
                 }
-
-                foreach (XmlNode qualityNode in presetNode.SelectNodes("Quality"))
+                else
                 {
+                    preset.Labels = Enum.GetValues(typeof(g_emItemLable)).Cast<g_emItemLable>().ToList();
+                }
+
+                XmlNode qualityNode = presetNode.SelectSingleNode("Quality");
+                if (qualityNode != null)
+                {
+                    preset.Qualities.Clear();
                     foreach (XmlNode labelNode in qualityNode.SelectNodes("Label"))
                     {
                         preset.Qualities.Add(labelNode.InnerText);
                     }
                 }
 
+                // Parse Tier settings
                 XmlNode tierNode = presetNode.SelectSingleNode("Tier");
                 if (tierNode != null)
                 {
                     var minAttr = tierNode.Attributes["min"];
                     if (minAttr != null)
                     {
-                        int.TryParse(minAttr.Value, out preset.Tier[0]);
+                        float.TryParse(minAttr.Value, out preset.Tier[0]);
                     }
 
                     var maxAttr = tierNode.Attributes["max"];
                     if (maxAttr != null)
                     {
-                        int.TryParse(maxAttr.Value, out preset.Tier[1]);
+                        float.TryParse(maxAttr.Value, out preset.Tier[1]);
                     }
                 }
 
-                foreach (XmlNode elementNode in presetNode.SelectNodes("Element"))
+                // Parse Element settings
+                XmlNode elementNode = presetNode.SelectSingleNode("Elements");
+                if (elementNode != null)
                 {
+                    preset.Elements.Clear();
                     foreach (XmlNode labelNode in elementNode.SelectNodes("Label"))
                     {
                         preset.Elements.Add(labelNode.InnerText);
@@ -314,11 +320,10 @@ namespace YaogUI
         {
             try
             {
-                Main.Debug("Hello there general kenobbi!");
                 if (StorageAreaHelper.presets.Count == 0)
                 {
                     Main.Debug("Loading presets...");
-                    StorageAreaHelper.presets = StorageAreaHelper.LoadPresets(StorageAreaHelper.defaultPresetXMLName);
+                    LoadPresets();
                 }
                 
                 var UI = StorageAreaHelper.UI;
@@ -332,7 +337,6 @@ namespace YaogUI
                 cBox.items[0] = TFMgr.Get("选择预设");
                 cBox.values[0] = "-1";
                 cBox.value = "-1";
-                cBox.selectedIndex = 0;
          
                 for (var i = 0; i < StorageAreaHelper.presets.Count; i++)
                 {
@@ -340,33 +344,40 @@ namespace YaogUI
                     cBox.items[i + 1] = StorageAreaHelper.presets[i].Name;
                 }
                 
-                Main.Debug("Loaded " + cBox.values.Length + " values");
-                Main.Debug("Loaded " + cBox.items.Length + " items");
                 cBox.onChanged.Add(e =>
                 {
                     int.TryParse(cBox.value, out var index);
                     if (index == -1) return;
-                    
+                    // Main.Debug($"Found preset {StorageAreaHelper.presets[index].Name} at index {index}");
                     ApplyPreset(StorageAreaHelper.presets[index]);
                     cBox.value = "-1";
                 });
+                
+                var reloadPresets = UI_Button.CreateInstance();
+                reloadPresets.text = "Reload";
+                reloadPresets.tooltips = TFMgr.Get("从 XML 重新加载预设");
+                reloadPresets.x = cBox.x + cBox.width + 10;
+                reloadPresets.y = cBox.y;
+                reloadPresets.onClick.Add(LoadPresets);
      
                 UI.AddChild(cBox);
+                UI.AddChild(reloadPresets);
             }
             catch (Exception e)
             {
                 Main.Debug(e.ToString());
             }
         }
-        public static void ApplyFiltersTest()
-        {
-            StorageAreaHelper.presets[0].ApplyToArea(StorageAreaHelper.area);
-            StorageAreaHelper.window.ShowOrUpdate();
-        }
         public static void ApplyPreset(StoragePreset preset)
         {
+            Main.Debug("Applying preset " + preset.Name);
             preset.ApplyToArea(StorageAreaHelper.area);
             StorageAreaHelper.window.ShowOrUpdate();
+        }
+
+        public static void LoadPresets()
+        {
+            StorageAreaHelper.presets = StorageAreaHelper.LoadPresets(StorageAreaHelper.defaultPresetXMLName);
         }
     }
  
