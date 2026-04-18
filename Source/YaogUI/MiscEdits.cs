@@ -24,4 +24,19 @@ namespace YaogUI
 			}
 		}
 	}
+	
+	[HarmonyPatch(typeof(Wnd_SelectNpc), "OnShowUpdate")]
+	public static class AutoSelectSingleNpc
+	{
+		public static void Postfix(Wnd_SelectNpc __instance)
+		{
+			// When picking an NPC for an action, if there's only one option, auto-select it
+			// This is to help with some annoying interaction where it doesn't really matter
+			// who you pick (like the Stella puzzles or when inspecting decorations)
+			if (__instance.UIInfo.m_n25.numItems == 1)
+			{
+				__instance.UIInfo.m_n25.GetChildAt(0).onClick.Call();
+			}
+		}
+	}
 }
