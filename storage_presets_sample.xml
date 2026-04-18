@@ -54,6 +54,13 @@
             <Label>Exquisite</Label>
             <Label>None</Label>
         </Quality>
+        <Quality>
+            <Label>Poor</Label>
+            <Label>Common</Label>
+            <Label>Excellent</Label>
+            <Label>Exquisite</Label>
+            <Label>None</Label>
+        </Quality>
         <Elements>
             <Label>None</Label>
             <Label>Metal</Label>
