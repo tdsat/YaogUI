@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Presets xmlns="YaogUI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="YaogUI storage_presets.xsd">
+    <Preset name="Gear" CanSale="true">
+        <Kind name="Equipment">
+            <Label>Weapon</Label>
+            <Label>Cape</Label>
+            <Label>Clothes</Label>
+            <Label>Trousers</Label>
+            <Label>Treasure</Label>
+            <Label>Horse</Label>
+        </Kind>
+    </Preset>
+    <Preset name="Pills" priority="Low" CanSale="true">
+        <Kind name="Material">
+            <Label>Drug</Label>
+        </Kind>
+        <Tier min="4" max="7"/>
+    </Preset>
+    <Preset name="Hot Stuff" priority="High" CanSale="true">
+        <Kind name="Practice">
+            <Label>Rock</Label>
+            <Label>RockBlock</Label>
+            <Label>Metal</Label>
+            <Label>Spell</Label>
+            <Label>Dan</Label>
+            <Label>Food</Label>
+            <Label>Ingredient</Label>
+            <Label>LingStone</Label>
+            <Label>Esoterica</Label>
+            <Label>FightFabao</Label>
+            <Label>TreasureFabao</Label>
+        </Kind>
+        <Elements>
+            <Label>Fire</Label>
+        </Elements>
+    </Preset>
+    <Preset name="Talismans" priority="High">
+        <Kind name="Practice">
+            <Label>SpellPaper</Label>
+        </Kind>
+    </Preset>
+    <Preset name="Talismans (Good)" priority="High">
+        <Kind name="Practice">
+            <Label>SpellPaper</Label>
+        </Kind>
+        <Tier min="6"/>
+    </Preset>
+    <Preset name="Nothing" onlyFSItem="true" CanSale="true" onlyBigFish="true">
+        <Kind name="None"/>
+        <Quality/>
+        <Tier/>
+        <Elements/>
+    </Preset>
+    <Preset name="Everything" priority="High" onlyFSItem="true" CanSale="true" onlyBigFish="true">
+        <Tier min="6"/>
+    </Preset>
+</Presets>
+
