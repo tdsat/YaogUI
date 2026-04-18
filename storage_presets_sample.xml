@@ -1,6 +1,9 @@
-<Presets>
+<?xml version="1.0" encoding="utf-8"?>
+<Presets xmlns="YaogUI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="YaogUI storage_presets.xsd">
     <Preset name="Everything" priority="High" onlyFSItem="false" CanSale="true" onlyBigFish="false"> <!--  Low Normal High -->
         <Tier min="0" max="12"/>
+<!-- Kind nodes don't need to be grouped, it's just done here for convenience
+ You can put all labels in one node-->
         <Kind name="None">
             <Label>Tool</Label>
             <Label>Garbage</Label>
