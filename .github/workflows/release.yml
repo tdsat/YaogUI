@@ -1,0 +1,33 @@
+on: 
+  push: 
+    tags:
+      - "v*.*.**"
+env:
+  RELEASE_FILES: |
+    Info.json
+    README.md
+    CHANGELOG.md
+    YaogUI.dll
+    0Harmony.dll
+    Preview.png
+    Language/**
+    Scripts/**
+    UI/**
+    default_presets.xml
+    custom_presets.xml
+    storage_presets.xsd
+    storage_presets_sample.xml
+jobs: 
+  release:
+    runs-on: ubuntu-latest
+#    permissions:
+#      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+      - name: Create Release
+        uses: softprops/action-gh-release@v3
+        with:
+          files: ${{ env.RELEASE_FILES }}
+          generate_release_notes: true
+  
