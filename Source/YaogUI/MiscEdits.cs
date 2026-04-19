@@ -1,22 +1,35 @@
 ﻿using HarmonyLib;
 using System;
 using FairyGUI;
+using XiaWorld;
 
 namespace YaogUI
 {
-	[HarmonyPatch(typeof(Wnd_GameMain), "OnInit")]
+	[HarmonyPatch(typeof(Wnd_GameMain), "UpdateStuffList")]
 	public static class DoubleMaterialRows
 	{
-		public static void Postfix(Wnd_GameMain __instance)
+		public static void Prefix(Wnd_GameMain __instance, GButton gButton, UIMainMenuListDef_Data data)
 		{
 			try
 			{
 				var materialList = __instance.UIInfo.m_MainList.m_StuffList;
 				var listBg = __instance.UIInfo.m_MainList.m_n9;
-				materialList.columnCount = 2;
+				materialList.x = listBg.x + 5;
 				materialList.layout = ListLayoutType.FlowVertical;
-				listBg.width = 115;
-				materialList.x = listBg.x;
+				
+				ThingDef def3 = ThingMgr.Instance.GetDef(g_emThingType.Building, data.ObjName);
+				if (def3.Building.BeMade.CostItems != null && def3.Building.BeMade.CostItems.Count > 0)
+				{ // Dual-material thing
+					listBg.width = 220;
+					materialList.width = 255;
+					materialList.columnGap = 65;
+				}
+				else
+				{
+					listBg.width = 120;
+					materialList.width = 130;
+					materialList.columnGap = 5;
+				}
 			}
 			catch (Exception e)
 			{
