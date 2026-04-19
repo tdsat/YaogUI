@@ -69,7 +69,13 @@ namespace YaogUI
             area.IncludeItemQ[3] = Qualities.Contains("Exquisite");
             area.IncludeItemQ[4] = Qualities.Contains("None");
             // Tier
-            area.IncludeItemRate = new Vector2(Tier[0], Tier[1]);
+            // Ok so tiers are a bit weird. Min tier's actual value is X-1 from what you see in the UI
+            // So a UI Tier on is actually 0. So when we set a min tier of 6, we need to subtract 1 from
+            // that to reflect what happens in game. We could require min to start from 0 in the XML, but
+            // that's bad UX and a bit confusing, so we handle it here
+            float min = Math.Min(12f, Math.Max(1, Tier[0])) - 1;
+            float max = Math.Min(12f, Math.Max(1, Tier[1]));
+            area.IncludeItemRate = new Vector2(min, max);
             // Elements
             area.IncludeElement[0] = Elements.Contains("None");
             area.IncludeElement[1] = Elements.Contains("Metal");
