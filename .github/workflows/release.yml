@@ -2,6 +2,7 @@ on:
   push: 
     tags:
       - "v*.*.**"
+
 env:
   RELEASE_FILES: |
     Info.json
@@ -16,18 +17,31 @@ env:
     default_presets.xml
     storage_presets.xsd
     storage_presets_sample.xml
+
 jobs: 
   release:
     runs-on: ubuntu-latest
-#    permissions:
-#      contents: write
+    permissions:
+      contents: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
+
+      - name: Zip files
+        run: |
+          mkdir YaogUI
+          # Read lines and copy them to the folder
+          while IFS= read -r line; do
+            [ -z "$line" ] && continue
+            # cp -r --parents $line YaogUI/ || true
+            # This handles directories and files.
+            cp -rd --parents $line YaogUI/ || true
+          done <<< "${{ env.RELEASE_FILES }}"
+          zip -r YaogUI.zip YaogUI
+
       - name: Create Release
         uses: softprops/action-gh-release@v3
         with:
           name: YaogUI ${{  github.ref_name }}
-          files: ${{ env.RELEASE_FILES }}
+          files: YaogUI.zip
           make_latest: true
-  
