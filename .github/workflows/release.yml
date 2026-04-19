@@ -28,6 +28,7 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v3
         with:
+          name: YaogUI ${{  github.ref_name }}
           files: ${{ env.RELEASE_FILES }}
-          generate_release_notes: true
+          make_latest: true
   
