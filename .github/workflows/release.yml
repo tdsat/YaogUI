@@ -45,3 +45,5 @@ jobs:
           name: YaogUI ${{  github.ref_name }}
           files: YaogUI.zip
           make_latest: true
+          generate_release_notes: true
+  
