@@ -1,3 +1,13 @@
+## v0.4.1 (19/04/2026)
+- (Storage Filters) User presets no overwrite default ones
+
+## v0.4 (18/04/2026)
+- (Storage Filters) Added Storage area presets functionality
+- (Storage Filters) Ctrl+Click on the Element/Quality options has a different effect
+- (Misc) Auto-select NPC during certain interactions if there's only one option
+- (Misc) Doubled the columns when selecting building material
+- (Trade Window) Fixed search not working in latest version
+
 ## v0.3 (03/09/2022)
  - Added `ignoreWorthlessItems` checkbox to the trade window.
  - Make sure Harmony patches are only applied once

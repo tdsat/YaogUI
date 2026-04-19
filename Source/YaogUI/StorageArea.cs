@@ -42,8 +42,9 @@ namespace YaogUI
             foreach (g_emItemLable label in Enum.GetValues(typeof(g_emItemLable)))
             {
                 if (Labels.Contains(label)) continue;
-                area.ExcludeItemLable.Add((int) label);
+                area.ExcludeItemLable.Add((int)label);
             }
+
             // Priority
             if (!string.IsNullOrEmpty(Priority))
             {
@@ -62,6 +63,7 @@ namespace YaogUI
                         break;
                 }
             }
+
             // Quality
             area.IncludeItemQ[0] = Qualities.Contains("Poor");
             area.IncludeItemQ[1] = Qualities.Contains("Common");
@@ -89,17 +91,18 @@ namespace YaogUI
             area.onlyFSItem = onlyFSItem;
         }
     }
+
     public static class StorageAreaHelper
     {
         public static readonly string defaultPresetXMLName = "default_presets.xml";
         public static readonly string userPresetXMLName = "custom_presets.xml";
-        
-        public static Wnd_StorageArea window;
-        public static List<StoragePreset> presets = new List<StoragePreset>();
 
-        public static List<StoragePreset> LoadPresets(string filename)
+        public static Wnd_StorageArea window;
+        public static Dictionary<string, StoragePreset> presets = new Dictionary<string, StoragePreset>();
+
+        public static Dictionary<string, StoragePreset> LoadPresets(string filename)
         {
-            var loaded = new List<StoragePreset>();
+            var loaded = new Dictionary<string, StoragePreset>();
             var xmlDoc = XmlLoader.ReadXmlFile(filename);
             if (xmlDoc == null)
             {
@@ -120,14 +123,7 @@ namespace YaogUI
                 var originalName = presetNode.Attributes["name"]?.Value;
                 string name = originalName;
                 if (originalName == null) name = $"Preset {index}";
-                else
-                {
-                    if (loaded.Select(p => p.Name).Contains(originalName))
-                    {
-                        name = $"{originalName} {index}";
-                    }
-                }
-                
+
                 var preset = new StoragePreset
                 {
                     Name = name,
@@ -136,14 +132,14 @@ namespace YaogUI
                     onlyFSItem = StoragePreset.GetTruthyValue(presetNode.Attributes["onlyFSItem"]?.Value),
                     onlyBigFish = StoragePreset.GetTruthyValue(presetNode.Attributes["onlyBigFish"]?.Value)
                 };
-                
+
                 // Parse Kinds (Items categories)
                 XmlNode kindNode = presetNode.SelectSingleNode("ns:Kind", nsmgr);
                 if (kindNode != null)
                 {
                     foreach (XmlNode labelNode in kindNode.SelectNodes("ns:Label", nsmgr))
                     {
-                        preset.Labels.Add((g_emItemLable) Enum.Parse(typeof(g_emItemLable), labelNode.InnerText));
+                        preset.Labels.Add((g_emItemLable)Enum.Parse(typeof(g_emItemLable), labelNode.InnerText));
                     }
                 }
                 else
@@ -192,8 +188,9 @@ namespace YaogUI
                     }
                 }
 
-                loaded.Add(preset);
+                loaded[preset.Name] = preset;
             }
+
             Main.Debug("Loaded " + loaded.Count + " presets");
 
             return loaded;
@@ -250,6 +247,26 @@ namespace YaogUI
                 uiCheckbox.selected = false;
             }
         }
+
+        public static void LoadPresets()
+        {
+            presets.Clear();
+            try
+            {
+                var userPresets = LoadPresets(userPresetXMLName);
+                presets = LoadPresets(defaultPresetXMLName);
+                // User presets should overwrite default ones
+                foreach (var kvp in userPresets)
+                {
+                    presets[kvp.Key] = kvp.Value;
+                }
+            }
+            catch (Exception e)
+            {
+                Main.Debug("User preset not found, loading default preset instead." + e);
+                presets = LoadPresets(defaultPresetXMLName);
+            }
+        }
     }
 
     [HarmonyPatch(typeof(Wnd_StorageArea), "OnShowUpdate")]
@@ -260,7 +277,7 @@ namespace YaogUI
             StorageAreaHelper.window = __instance;
         }
     }
-    
+
     [HarmonyPatch(typeof(Wnd_StorageArea), "OnInit")]
     public static class AddCtrlModifiersToClickHandler // This class name makes no sense...
     {
@@ -281,11 +298,13 @@ namespace YaogUI
                 toggleItems.visible = true;
                 toggleItems.onClick.Add(StorageAreaHelper.ToggleAll);
                 UI.AddChild(toggleItems);
+                var tooltip = TFMgr.Get("按住 Ctrl 键并单击以取消选择其他选项") + "\n Hello there";
 
                 // Ctrl+Click disables all elements except for the selected one
                 for (var elementIdx = 0; elementIdx < buttons.Length; elementIdx++)
                 {
                     var gButton = buttons[elementIdx];
+                    gButton.tooltips = tooltip;
                     gButton.onClick.Add(e =>
                     {
                         if (!e.inputEvent.ctrl) return;
@@ -299,6 +318,7 @@ namespace YaogUI
                 for (int i = 0; i < StorageAreaHelper.qualityCheckboxList.Length; i++)
                 {
                     var checkbox = StorageAreaHelper.qualityCheckboxList[i];
+                    checkbox.tooltips = tooltip;
                     checkbox.onClick.Add(e =>
                     {
                         if (!e.inputEvent.ctrl) return;
@@ -324,19 +344,19 @@ namespace YaogUI
                 if (StorageAreaHelper.presets.Count == 0)
                 {
                     Main.Debug("Loading presets...");
-                    LoadPresets();
+                    StorageAreaHelper.LoadPresets();
                 }
                 
                 var UI = StorageAreaHelper.UI;
                 var presetDropdown = CreatePresetDropdown();
-                
+
                 var reloadPresets = UIPackage.CreateObjectFromURL("ui://ncbwb41mv9j6ah");
                 reloadPresets.text = "Reload";
                 reloadPresets.tooltips = TFMgr.Get("从 XML 重新加载预设");
                 reloadPresets.x = presetDropdown.x + presetDropdown.width + 10;
                 reloadPresets.y = presetDropdown.y;
                 reloadPresets.onClick.Add(ReloadPresets);
-     
+
                 UI.AddChild(reloadPresets);
             }
             catch (Exception e)
@@ -344,6 +364,7 @@ namespace YaogUI
                 Main.Debug(e.ToString());
             }
         }
+
         public static void ApplyPreset(StoragePreset preset)
         {
             Main.Debug("Applying preset " + preset.Name);
@@ -351,31 +372,14 @@ namespace YaogUI
             StorageAreaHelper.window.ShowOrUpdate();
         }
 
-        public static void LoadPresets()
-        {
-            StorageAreaHelper.presets.Clear();
-            try
-            {
-                var userPresets = StorageAreaHelper.LoadPresets(StorageAreaHelper.userPresetXMLName);
-                var defaultPresets = StorageAreaHelper.LoadPresets(StorageAreaHelper.defaultPresetXMLName);
-                StorageAreaHelper.presets = userPresets.Concat(defaultPresets).ToList();
-            }
-            catch (Exception e)
-            {
-                Main.Debug("User preset not found, loading default preset instead." + e);
-                StorageAreaHelper.presets = StorageAreaHelper.LoadPresets(StorageAreaHelper.defaultPresetXMLName);
-            }
-        }
-        
         public static void ReloadPresets()
         {
-            LoadPresets();
+            StorageAreaHelper.LoadPresets();
             CreatePresetDropdown();
         }
 
         public static UI_ComboBox CreatePresetDropdown()
         {
-            
             var UI = StorageAreaHelper.UI;
             // Creating this combobox is a pain in the ass...
             var dropdown = UI_ComboBox.CreateInstance();
@@ -388,25 +392,27 @@ namespace YaogUI
             dropdown.items[0] = TFMgr.Get("选择预设");
             dropdown.values[0] = "-1";
             dropdown.value = "-1";
+            dropdown.selectedIndex = 0;
 
-            for (var i = 0; i < StorageAreaHelper.presets.Count; i++)
+            int index = 1;
+            foreach (var storagePreset in StorageAreaHelper.presets)
             {
-                dropdown.values[i + 1] = i.ToString();
-                dropdown.items[i + 1] = StorageAreaHelper.presets[i].Name;
+                dropdown.values[index] = storagePreset.Key;
+                dropdown.items[index] = storagePreset.Key;
+                ++index;
             }
-                
+
             dropdown.onChanged.Add(e =>
             {
-                int.TryParse(dropdown.value, out var index);
-                if (index == -1) return;
-                ApplyPreset(StorageAreaHelper.presets[index]);
+                if (dropdown.value == "-1") return;
+                ApplyPreset(StorageAreaHelper.presets[dropdown.value]);
                 dropdown.value = "-1";
             });
-            
+
             // Remove the old one if it exists. Not sure if there's a better way to do this...
-            if (UI.GetChild("YaogUI.PresetDropdown") != null) 
+            if (UI.GetChild("YaogUI.PresetDropdown") != null)
                 UI.RemoveChild(UI.GetChild("YaogUI.PresetDropdown"), true);
-            
+
             UI.AddChild(dropdown);
             dropdown.dropdown.minWidth = 200;
             dropdown.UpdateDropdownList();
@@ -414,5 +420,4 @@ namespace YaogUI
             return dropdown;
         }
     }
- 
 }

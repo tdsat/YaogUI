@@ -1,8 +1,8 @@
 # YaogUI
 
-A UI mod for Amazing Cultivation Simulator. Currently in very early stages of development.
+A UI mod for Amazing Cultivation Simulator. Currently, in the early stages of development.
 
-This is mostly intended for the english version of the game, but most of the features _should_ work in the chinese version too.
+This is mostly intended for the English version of the game, but most of the features _should_ work in the Chinese version too.
 
 Releases can be downloaded from [NexusMods](https://www.nexusmods.com/amazingcultivationsimulator/mods/9/)
 
@@ -14,6 +14,14 @@ Releases can be downloaded from [NexusMods](https://www.nexusmods.com/amazingcul
 - Sold items are sorted alphabetically
 - Added a checkbox to exclude worthless items from the list
   - By worthless I mean items that have a trade value of 0, not useless.
+
+##### How to add custom presets
+You can add custom presets by creating a `custom_presets.xml` and adding your own. You can use the `storage_presets_sample.xml`
+as a reference since it contains all available options. 
+
+The simplest way to add custom presets is to copy the `default_presets.xml` and rename it to `custom_presets.xml`
+
+> Please note that custom presets will overwrite default ones if they have the same name
 
 ### Talisman Drawing Window
 - Ability to search when crafting item

@@ -4,3 +4,4 @@ Key	Value
 全部切换	Toggle all
 选择预设	Select preset
 从 XML 重新加载预设	Reload preset from XML
+按住 Ctrl 键并单击以取消选择其他选项	Ctrl+Click to deselect the other options
