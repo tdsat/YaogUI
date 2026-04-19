@@ -304,7 +304,6 @@ namespace YaogUI
                 for (var elementIdx = 0; elementIdx < buttons.Length; elementIdx++)
                 {
                     var gButton = buttons[elementIdx];
-                    gButton.tooltips = tooltip;
                     gButton.onClick.Add(e =>
                     {
                         if (!e.inputEvent.ctrl) return;
@@ -318,7 +317,6 @@ namespace YaogUI
                 for (int i = 0; i < StorageAreaHelper.qualityCheckboxList.Length; i++)
                 {
                     var checkbox = StorageAreaHelper.qualityCheckboxList[i];
-                    checkbox.tooltips = tooltip;
                     checkbox.onClick.Add(e =>
                     {
                         if (!e.inputEvent.ctrl) return;
