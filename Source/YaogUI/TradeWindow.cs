@@ -83,6 +83,7 @@ namespace YaogUI
 					AddTradeWindowSellItemSearch.FilterSellList(); 
 				});
 
+				TradeWindowFields.ignoreItemsList.Clear();
 				// Build a local cache of worthless items.
 				var saleList = Traverse.Create(__instance).Field("saleList").GetValue<TradeSaleList>();
 				var rightTree = Traverse.Create(saleList).Field("rightTree").GetValue<TreeView>();
