@@ -280,14 +280,4 @@ namespace YaogUI
 			}
 		}
 	}
-
-	[HarmonyPatch(typeof(Wnd_SchoolTrade), "OnInit")]
-	public static class CleanUp
-	{
-		public static void Postfix(Wnd_SchoolTrade __instance)
-		{
-			// TradeWindowFields.CleanUp();
-			__instance.onRemovedFromStage.Add(TradeWindowFields.CleanUp);
-		}
-	}
 }
