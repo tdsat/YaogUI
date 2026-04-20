@@ -16,6 +16,8 @@ namespace YaogUI
 		public static UI_ClearableInput sellSearchInput;
 		public static UI_ClearableInput buySearchInput;
 		public static UI_TradeCategoryList categoryList;
+		public static readonly string CategoryPanel = "YaogUI.CategoryPanel";
+
 		public static bool ignoreWorthlessItems = false;
 
 		public static void CleanUp()
@@ -39,20 +41,23 @@ namespace YaogUI
 			{
 				UI_TradeCategoryList categoryPanel;
 
-				var tradeWindow = __instance;
-				if ((categoryPanel = TradeWindowFields.categoryList) == null)
+				if (__instance.UIInfo.GetChild(TradeWindowFields.CategoryPanel) == null)
 				{
-					TradeWindowFields.categoryList = UI_TradeCategoryList.CreateInstance();
-					categoryPanel = TradeWindowFields.categoryList;
-					tradeWindow.UIInfo.AddChild(categoryPanel);
+					categoryPanel = UI_TradeCategoryList.CreateInstance();
+					categoryPanel.name = TradeWindowFields.CategoryPanel;
+					__instance.UIInfo.AddChild(categoryPanel);
+				}
+				else
+				{
+					categoryPanel = (UI_TradeCategoryList)__instance.UIInfo.GetChild(TradeWindowFields.CategoryPanel);
 				}
 				
-				// tradeWindow.UIInfo.GetChild(TradeWindowFields.SellSearchInput).visible = true;
-				// tradeWindow.UIInfo.GetChild(TradeWindowFields.BuySearchInput).visible = true;
+				// TradeWindowFields.sellSearchInput.visible = true;
+				// TradeWindowFields.buySearchInput.visible = true;
 				categoryPanel.visible = true;
-				var sellItemList = tradeWindow.UIInfo.m_rightitem;
+				var sellItemList = __instance.UIInfo.m_rightitem;
 
-				var categoryList = (GList)categoryPanel.GetChild("list");
+				var categoryList = (GList)categoryPanel.m_list;
 				var items = sellItemList.GetChildren();
 				categoryList.RemoveChildrenToPool();
 
@@ -79,7 +84,7 @@ namespace YaogUI
 				});
 
 				// Build a local cache of worthless items.
-				var saleList = Traverse.Create(tradeWindow).Field("saleList").GetValue<TradeSaleList>();
+				var saleList = Traverse.Create(__instance).Field("saleList").GetValue<TradeSaleList>();
 				var rightTree = Traverse.Create(saleList).Field("rightTree").GetValue<TreeView>();
 				var root = rightTree.root;
 				var _iData = Traverse.Create(__instance).Field("_iData").GetValue<ITradeItemData>();
@@ -237,7 +242,7 @@ namespace YaogUI
 
 	}
 
-	// Needed to get the values of priceDef and iData. Can't simply Traverse because they seem to be null
+	// Needed to get the values of priceDef. Can't simply Traverse because they seem to be null
 	// when we need/use them
 	[HarmonyPatch(typeof(Wnd_SchoolTrade), "ShowSchool")]
 	public static class StorePriceDefForSchoolTrade
@@ -248,12 +253,11 @@ namespace YaogUI
 			{
 				SchoolTradeDef schoolDef = TradeMgr.Instance.GetSchoolTradeDef(school);
 				TradeWindowFields.priceDef = TradeMgr.Instance.GetPriceDef(schoolDef.Price);
-				TradeWindowFields.iData = TradeMgr.Instance.GetSchoolTrade(school);
 			}
 		}
 	}
 
-	// Needed to get the values of priceDef and iData. Can't simply Traverse because they seem to be null
+	// Needed to get the values of priceDef. Can't simply Traverse because they seem to be null
 	// when we need/use them
 	[HarmonyPatch(typeof(Wnd_SchoolTrade), "ShowWalkTrader")]
 	public static class StorePriceDefForTrader
@@ -264,7 +268,6 @@ namespace YaogUI
 			{
 				TradeWalkDef tradeDef = TradeMgr.Instance.GetWalkTradeDef(null);
 				TradeWindowFields.priceDef = TradeMgr.Instance.GetPriceDef(tradeDef.Price);
-				TradeWindowFields.iData = TradeMgr.Instance.WalkTrader.GetTrader(walker);
 			}
 		}
 	}
