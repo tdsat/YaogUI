@@ -13,7 +13,6 @@ namespace YaogUI
 	{
 		public static List<string> ignoreItemsList = new List<string>();
 		public static TradePriceDef priceDef;
-		public static ITradeItemData iData;
 		public static UI_ClearableInput sellSearchInput;
 		public static UI_ClearableInput buySearchInput;
 		public static UI_TradeCategoryList categoryList;
@@ -83,6 +82,8 @@ namespace YaogUI
 				var saleList = Traverse.Create(tradeWindow).Field("saleList").GetValue<TradeSaleList>();
 				var rightTree = Traverse.Create(saleList).Field("rightTree").GetValue<TreeView>();
 				var root = rightTree.root;
+				var _iData = Traverse.Create(__instance).Field("_iData").GetValue<ITradeItemData>();
+
 				for (int i = 0; i < root.numChildren; i++)
 				{
 					TreeNode folder = root.GetChildAt(i);
@@ -92,7 +93,7 @@ namespace YaogUI
 						TradeSaleList.NodeData nodeData = saleList.TNode2NodeData(itemNode);
 						var itemName = itemNode.data as string;
 						TradePrice salePrice = TradeWindowFields.priceDef.GetItemPrice(nodeData.ItemName, nodeData.Rate).SalePrice;
-						var finalPrice = TradeWindowFields.iData.ScaleSalePrice(salePrice.Value, nodeData.ItemName);
+						var finalPrice = _iData.ScaleSalePrice(salePrice.Value, nodeData.ItemName);
 						if (finalPrice < 1)
 						{
 							TradeWindowFields.ignoreItemsList.Add(nodeData.ItemName);
@@ -268,7 +269,7 @@ namespace YaogUI
 		}
 	}
 
-	// Needed so that components get hidden when user accepts trade. There might be a better way to achieve this
+	// Needed so that components get hidden when a user accepts trade. There might be a better way to achieve this
 	[HarmonyPatch(typeof(Wnd_SchoolTrade), "__selectyes")]
 	public static class HideTradeComponents
 	{
