@@ -1,19 +1,28 @@
-local YaogUI = GameMain:GetMod("YaogUI");--Register a new mod first
+local YaogUI = GameMain:GetMod("YaogUI");
 
 function YaogUI:OnBeforeInit()
-  xlua.private_accessible(CS.XLua.LuaEnv)
-  xlua.private_accessible(CS.XLua.ObjectTranslator)
-  local thisData = CS.ModsMgr.Instance:FindMod("YaogUI", nil, true)
-  if thisData == nil then return end;
-  local thisPath = thisData.Path
-  local mllFile = CS.System.IO.Path.Combine(thisPath, "YaogUI.dll")
-  local asm = CS.System.Reflection.Assembly.LoadFrom(mllFile)
-  CS.XiaWorld.LuaMgr.Instance.Env.translator.assemblies:Add(asm)
-  CS.YaogUI.Main.Patch()
+	local MLL = CS.ModsMgr.Instance:FindMod("ModLoaderLite", nil, true)
+	if (MLL ~= nill) then
+	-- Don't bother, MLL will handle loading the assembly
+	-- This is not ideal, but I can't find a more reliable way to prevent double patch application
+		print('[YaogUI]MLL Detected - skip loading assembly')
+		return;
+	end
+	xlua.private_accessible(CS.XLua.LuaEnv)
+	xlua.private_accessible(CS.XLua.ObjectTranslator)
+	local thisData = CS.ModsMgr.Instance:FindMod("YaogUI", nil, true)
+	if thisData == nil then
+		return
+	end;
+	local thisPath = thisData.Path
+	local mllFile = CS.System.IO.Path.Combine(thisPath, "YaogUI.dll")
+	local asm = CS.System.Reflection.Assembly.LoadFrom(mllFile)
+	CS.XiaWorld.LuaMgr.Instance.Env.translator.assemblies:Add(asm)
+	CS.YaogUI.Main.Patch()
 end
 
 function YaogUI:OnInit()
-	print("YaogUI Initiated");
+	print("[YaogUI] Lua Initiated");
 	local tbEventMod = GameMain:GetMod("_Event")
 
 	-- Clean messages on load
@@ -42,7 +51,9 @@ function FilterList(list, needle, searchTextCb)
 end
 
 function YaogUI:ClearMessageIfHealthy(npc, objs)
-	if npc == nil or npc.IsPlayerThing == false or npc.AtG == false or npc.IsPuppet then return end;
+	if npc == nil or npc.IsPlayerThing == false or npc.AtG == false or npc.IsPuppet then
+		return
+	end;
 	local bdDamageItems = npc.PropertyMgr.BodyData.m_DamageID;
 	local doRemoveMesages = true;
 	if (bdDamageItems.Count > 0) then
