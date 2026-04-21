@@ -113,11 +113,16 @@ namespace YaogUI
 					Main.Debug($"Found {tradeList.list.numItems} for {balanceButton.name}");
 					for (int i = 0; i < tradeList.list.numItems; i++)
 					{
-						var node = tradeList.list.GetChildAt(i).data as TreeNode;
-						if (node.data2 is TradeItem tradeItem && tradeItem.ItemName == "Item_LingStone")
+						var node = (TreeNode)tradeList.list.GetChildAt(i).data;
+						if (node.data2 != null)
 						{
-							spiritStoneNode = node;
-							break;
+							if (((TradeItem) node.data2).ItemName == "Item_LingStone")
+							{
+								spiritStoneNode = node;
+								Main.Debug($"Ling node at {tradeList.GetNodeIndex(node)}");
+								break;
+							}
+
 						}
 					}
 
