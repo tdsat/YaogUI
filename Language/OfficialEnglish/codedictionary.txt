@@ -5,3 +5,5 @@ Key	Value
 选择预设	Select preset
 从 XML 重新加载预设	Reload preset from XML
 按住 Ctrl 键并单击以取消选择其他选项	Ctrl+Click to deselect the other options
+未找到灵石	No spirit stones found
+点击使用灵石平衡交易。	Click to balance the trade using Spirit Stones
