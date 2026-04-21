@@ -15,9 +15,10 @@ namespace YaogUI
 			try
 			{
 				Assembly.LoadFrom(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "0Harmony.dll"));
-				Harmony harmony = new Harmony("YaogUI");
+				Harmony harmony = new Harmony("YaogUI!");
 				harmony.PatchAll();
 				Patched = true;
+				YaogUIBinder.BindAll();
 				Debug("Loaded!");
 			}
 			catch (Exception e)

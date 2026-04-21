@@ -2,7 +2,7 @@ local YaogUI = GameMain:GetMod("YaogUI");
 
 function YaogUI:OnBeforeInit()
 	local MLL = CS.ModsMgr.Instance:FindMod("ModLoaderLite", nil, true)
-	if (MLL ~= nill) then
+	if (MLL ~= nil and MLL.IsActive) then
 	-- Don't bother, MLL will handle loading the assembly
 	-- This is not ideal, but I can't find a more reliable way to prevent double patch application
 		print('[YaogUI]MLL Detected - skip loading assembly')
