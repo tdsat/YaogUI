@@ -15,7 +15,7 @@ namespace YaogUI
 				var materialList = __instance.UIInfo.m_MainList.m_StuffList;
 				var listBg = __instance.UIInfo.m_MainList.m_n9;
 				materialList.x = listBg.x + 5;
-				materialList.layout = ListLayoutType.FlowVertical;
+				materialList.layout = ListLayoutType.FlowHorizontal;
 				
 				ThingDef def3 = ThingMgr.Instance.GetDef(g_emThingType.Building, data.ObjName);
 				if (def3.Building.BeMade.CostItems != null && def3.Building.BeMade.CostItems.Count > 0)
@@ -28,7 +28,7 @@ namespace YaogUI
 				{
 					listBg.width = 120;
 					materialList.width = 130;
-					materialList.columnGap = 5;
+					materialList.columnGap = 0;
 				}
 			}
 			catch (Exception e)
