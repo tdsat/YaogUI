@@ -12,13 +12,11 @@ namespace YaogUI
 		public static void Patch()
 		{
 			if (Patched) return;
-			
 			try
 			{
 				Assembly.LoadFrom(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "0Harmony.dll"));
 				Harmony harmony = new Harmony("YaogUI");
 				harmony.PatchAll();
-				YaogUIBinder.BindAll();
 				Patched = true;
 				Debug("Loaded!");
 			}
@@ -39,6 +37,9 @@ namespace YaogUI
 	    public static void OnInit()
 	    {
 		    Main.Debug("MLL Detected - skip patching");
+		    // Since the Patch method will not run, we need to bind the new UI elements here
+			YaogUIBinder.BindAll();
+		    
 		    Main.Patched = true;
 	    }
     }
