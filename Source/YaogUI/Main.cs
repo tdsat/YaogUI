@@ -8,19 +8,18 @@ namespace YaogUI
 {
     public static class Main
 	{
-		private static bool Patched = false;
+		public static bool Patched;
 		public static void Patch()
 		{
+			if (Patched) return;
+			
 			try
 			{
 				Assembly.LoadFrom(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "0Harmony.dll"));
-				Harmony harmony = new Harmony("YaogUI!");
-				if (!Patched)
-                {
-					harmony.PatchAll();
-					Patched = true;
-				}
+				Harmony harmony = new Harmony("YaogUI");
+				harmony.PatchAll();
 				YaogUIBinder.BindAll();
+				Patched = true;
 				Debug("Loaded!");
 			}
 			catch (Exception e)
@@ -28,12 +27,21 @@ namespace YaogUI
 				Debug(e.ToString());
 			}
 		}
+
 		public static void Debug(string message)
 		{
-			KLog.Dbg(string.Format("[YaogUI]{0}", message), new object[0]);
+			KLog.Dbg(string.Format("[YaogUI]{0}", message));
 		}
 	}
 
+    public static class YaogUI
+    {
+	    public static void OnInit()
+	    {
+		    Main.Debug("MLL Detected - skip patching");
+		    Main.Patched = true;
+	    }
+    }
 
 	public static class XmlLoader
 	{
