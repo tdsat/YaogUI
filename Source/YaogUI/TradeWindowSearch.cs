@@ -4,7 +4,6 @@ using HarmonyLib;
 using XiaWorld.UI.InGame;
 using System.Collections.Generic;
 using XiaWorld;
-using XiaWorld.ThingStep;
 using System.Linq;
 
 namespace YaogUI
@@ -18,13 +17,13 @@ namespace YaogUI
 		public static UI_TradeCategoryList categoryList;
 		public static readonly string CategoryPanel = "YaogUI.CategoryPanel";
 
-		public static bool ignoreWorthlessItems = false;
+		public static bool ignoreWorthlessItems;
 
 		public static void CleanUp()
 		{
 			sellSearchInput.onKeyDown.Clear();
 			buySearchInput.onKeyDown.Clear();
-			// categoryList.m_hideWorthlessCheckbox.RemoveEventListeners();
+			categoryList.m_hideWorthlessCheckbox.RemoveEventListeners();
 
 			categoryList.visible = false;
 			sellSearchInput.visible = false;
@@ -51,13 +50,13 @@ namespace YaogUI
 				{
 					categoryPanel = (UI_TradeCategoryList)__instance.UIInfo.GetChild(TradeWindowFields.CategoryPanel);
 				}
-				
-				// TradeWindowFields.sellSearchInput.visible = true;
-				// TradeWindowFields.buySearchInput.visible = true;
+
+				TradeWindowFields.sellSearchInput.visible = true;
+				TradeWindowFields.buySearchInput.visible = true;
 				categoryPanel.visible = true;
 				var sellItemList = __instance.UIInfo.m_rightitem;
 
-				var categoryList = (GList)categoryPanel.m_list;
+				var categoryList = (GList)categoryPanel.GetChild("list");
 				var items = sellItemList.GetChildren();
 				categoryList.RemoveChildrenToPool();
 
@@ -75,38 +74,45 @@ namespace YaogUI
 					btn.height = 30;
 					btn.onClick.Set(() => sellItemList.ScrollToView(index, true, true));
 				}
+
 				categoryPanel.x = sellItemList.x + sellItemList.width;
 				categoryPanel.y = sellItemList.y - 60;
 				categoryPanel.height = categoryList.numItems * 30 + 65;
-                categoryPanel.m_hideWorthlessCheckbox.onClick.Add(e => {
+				categoryPanel.m_hideWorthlessCheckbox.onClick.Add(e =>
+				{
 					TradeWindowFields.ignoreWorthlessItems = ((GButton)e.sender).selected;
-					AddTradeWindowSellItemSearch.FilterSellList(); 
+					AddTradeWindowSellItemSearch.FilterSellList();
 				});
-
+				TradeWindowFields.ignoreWorthlessItems = categoryPanel.m_hideWorthlessCheckbox.selected;
 				TradeWindowFields.ignoreItemsList.Clear();
 				// Build a local cache of worthless items.
-				var saleList = Traverse.Create(__instance).Field("saleList").GetValue<TradeSaleList>();
+				var saleList = __instance.GetParts()[3] as TradeSaleList;
 				var rightTree = Traverse.Create(saleList).Field("rightTree").GetValue<TreeView>();
 				var root = rightTree.root;
-				var _iData = Traverse.Create(__instance).Field("_iData").GetValue<ITradeItemData>();
+				var iData = Traverse.Create(__instance).Field("_iData").GetValue<ITradeItemData>();
 
 				for (int i = 0; i < root.numChildren; i++)
 				{
-					TreeNode folder = root.GetChildAt(i);
+					var folder = root.GetChildAt(i);
 					for (int j = 0; j < folder.numChildren; j++)
 					{
 						TreeNode itemNode = folder.GetChildAt(j);
 						TradeSaleList.NodeData nodeData = saleList.TNode2NodeData(itemNode);
 						var itemName = itemNode.data as string;
-						TradePrice salePrice = TradeWindowFields.priceDef.GetItemPrice(nodeData.ItemName, nodeData.Rate).SalePrice;
-						var finalPrice = _iData.ScaleSalePrice(salePrice.Value, nodeData.ItemName);
+
+						TradePrice tradeValue = TradeWindowFields.priceDef
+							.GetItemPrice(nodeData.ItemName, nodeData.Rate).SalePrice;
+						var finalPrice = iData.ScaleSalePrice(tradeValue.Value, nodeData.ItemName);
+						// Main.Debug($"Final price for {nodeData.ItemName} with value of {finalPrice}");
+
 						if (finalPrice < 1)
 						{
 							TradeWindowFields.ignoreItemsList.Add(nodeData.ItemName);
 						}
+
 						// While we're at it, also sort the items in each folder by name
 						if (j > 0)
-                        {
+						{
 							int k = j;
 							do
 							{
@@ -118,7 +124,7 @@ namespace YaogUI
 					}
 				}
 			}
-            catch (Exception e)
+			catch (Exception e)
 			{
 				Main.Debug(e.ToString());
 			}
@@ -134,23 +140,22 @@ namespace YaogUI
 			{
 				var tradeWindow = __instance;
 				TradeWindowFields.sellSearchInput = UI_ClearableInput.CreateInstance();
-				// Maan I really need to clean this up. Let's make it work first I guess...
 				var searchInput = TradeWindowFields.sellSearchInput;
-                var clearSearchBtn = searchInput.m_clearButton;
+				var clearSearchBtn = searchInput.m_clearButton;
 
-                var list = tradeWindow.UIInfo.m_rightitem;
+				var list = tradeWindow.UIInfo.m_rightitem;
 				list.foldInvisibleItems = true;
 
 				searchInput.x = list.x - 10;
 				searchInput.y = list.y - 40;
 				searchInput.width = list.width;
 
-                searchInput.onKeyDown.Add(FilterSellList);
-                clearSearchBtn.onClick.Add(ClearSellSearch);
+				searchInput.onKeyDown.Add(FilterSellList);
+				clearSearchBtn.onClick.Add(ClearSellSearch);
 				// Search again when switching schools since items have changed
-                tradeWindow.UIInfo.m_n51.onClickItem.Add(ClearSellSearch);
+				tradeWindow.UIInfo.m_n51.onClickItem.Add(ClearSellSearch);
 
-                tradeWindow.UIInfo.AddChild(searchInput);
+				tradeWindow.UIInfo.AddChild(searchInput);
 			}
 			catch (Exception e)
 			{
@@ -160,35 +165,35 @@ namespace YaogUI
 
 		public static void FilterSellList()
 		{
-			var tradeWindow	= Wnd_SchoolTrade.Instance;
-			var list		= tradeWindow.UIInfo.m_rightitem;
-            var items		= list.GetChildren();
-            var searchText	= TradeWindowFields.sellSearchInput.text.ToLower();
+			var tradeWindow = Wnd_SchoolTrade.Instance;
+			var list = tradeWindow.UIInfo.m_rightitem;
+			var items = list.GetChildren();
+			var searchText = TradeWindowFields.sellSearchInput.text.ToLower();
 
-            // Meh... this can be simplified but w/e
-            var callbacks = new List<Func<UI_TradeItem, bool>>
-            {
-                item => item.m_itemname.text.ToLower().Contains(searchText)
-            };
-            if (TradeWindowFields.ignoreWorthlessItems)
-            {
-                callbacks.Add(item => !TradeWindowFields.ignoreItemsList.Contains(item.name));
-            }
+			// Meh... this can be simplified but w/e
+			var callbacks = new List<Func<UI_TradeItem, bool>>
+			{
+				item => item.m_itemname.text.ToLower().Contains(searchText)
+			};
+			if (TradeWindowFields.ignoreWorthlessItems)
+			{
+				callbacks.Add(item => !TradeWindowFields.ignoreItemsList.Contains(item.name));
+			}
 
-            foreach (UI_TradeItem item in items)
-            {
-                item.visible = callbacks.TrueForAll(x => x(item));
-            }
-        }
+			foreach (UI_TradeItem item in items)
+			{
+				item.visible = callbacks.TrueForAll(x => x(item));
+			}
+		}
 
 		private static void ClearSellSearch()
 		{
 			var searchField = TradeWindowFields.sellSearchInput;
-            searchField.text = "";
-            FilterSellList();
-        }
-
+			searchField.text = "";
+			FilterSellList();
+		}
 	}
+
 
 	[HarmonyPatch(typeof(Wnd_SchoolTrade), "OnInit")]
 	public static class AddTradeWindowBuyItemSearch
@@ -231,7 +236,8 @@ namespace YaogUI
 
 			foreach (UI_TradeItem item in items)
 			{
-				item.visible = item.m_typename.text == "ItemType" || item.m_itemname.text.ToLower().Contains(searchText);
+				item.visible = item.m_typename.text == "ItemType" ||
+				               item.m_itemname.text.ToLower().Contains(searchText);
 			}
 		}
 
@@ -240,7 +246,6 @@ namespace YaogUI
 			TradeWindowFields.buySearchInput.text = "";
 			FilterBuyList();
 		}
-
 	}
 
 	// Needed to get the values of priceDef. Can't simply Traverse because they seem to be null
@@ -273,14 +278,14 @@ namespace YaogUI
 		}
 	}
 
-	// Needed so that components get hidden when a user accepts trade. There might be a better way to achieve this
+	// Needed so that components get hidden when user accepts trade. There might be a better way to achieve this
 	[HarmonyPatch(typeof(Wnd_SchoolTrade), "__selectyes")]
 	public static class HideTradeComponents
 	{
 		public static void Postfix(Wnd_SchoolTrade __instance)
 		{
 			if (__instance.UIInfo.m_state.selectedIndex == 1)
-            {
+			{
 				TradeWindowFields.CleanUp();
 			}
 		}
