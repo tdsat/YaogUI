@@ -8,6 +8,7 @@ namespace YaogUI
 {
 	public static class AutoBalance
 	{
+		public static bool initialized = false;
 		public static GButton balanceRightBtn;
 		public static GButton balanceLeftBtn;
 
@@ -20,23 +21,22 @@ namespace YaogUI
 			var sellPrice = sellValue?.Value ?? 0;
 			var buyPrice = buyValue?.Value ?? 0;
 			int difference = sellPrice - buyPrice;
-			Main.Debug($"Difference: {difference}");
+
 			if (difference != 0)
 			{
 				Traverse.Create(tradeList).Method("ToSelect", new[]
-						{ typeof(TreeNode), typeof(TreeView), typeof(int) }, new object[] { spiritStoneNode, selectList, difference})
+							{ typeof(TreeNode), typeof(TreeView), typeof(int) }, new object[] { spiritStoneNode, selectList, difference })
 					.GetValue();
 			}
 		}
 	}
-
-	[HarmonyDebug]
 	[HarmonyPatch(typeof(Wnd_SchoolTrade), "OnInit")]
 	public static class AutoBalance_Wnd_SchoolTrade_OnInit
 	{
 		[HarmonyPostfix]
 		public static void AddBalanceButtons(Wnd_SchoolTrade __instance)
 		{
+			if (AutoBalance.initialized) return; //Another attempt to avoid MLL. Fuck this shit honestly
 			try
 			{
 				var UI = __instance.UIInfo;
@@ -45,30 +45,29 @@ namespace YaogUI
 				balanceRight.name = "YaogUI.BalanceRight";
 				balanceRight.text = TFMgr.Get("平衡");
 				balanceRight.tooltips = TFMgr.Get("点击使用灵石平衡交易。");
-
-				balanceRight.x = 180;
+				balanceRight.x = UI.width - 250;
 				balanceRight.y = 65;
 				AutoBalance.balanceRightBtn = balanceRight;
 
-				var balanceLeft = AutoBalance.balanceLeftBtn ?? (GButton) UIPackage.CreateObjectFromURL("ui://ncbwb41mv9j6ah");
+				var balanceLeft = AutoBalance.balanceLeftBtn ?? (GButton)UIPackage.CreateObjectFromURL("ui://ncbwb41mv9j6ah");
 				balanceLeft.name = "YaogUI.BalanceLeft";
 				balanceLeft.text = balanceRight.text;
 				balanceLeft.tooltips = balanceRight.tooltips;
-				balanceLeft.x = UI.width - 250;
+				balanceLeft.x = 180;
 				balanceLeft.y = 65;
 				AutoBalance.balanceLeftBtn = balanceLeft;
 
-				//MLL Hack
+				//MLL Hacks...
 				if (UI.GetChild("YaogUI.BalanceLeft") != null)
 					UI.RemoveChild(UI.GetChild("YaogUI.BalanceLeft"));
 				if (UI.GetChild("YaogUI.BalanceRight") != null)
 					UI.RemoveChild(UI.GetChild("YaogUI.BalanceRight"));
-
 				UI.RemoveChild(balanceLeft);
 				UI.RemoveChild(balanceRight);
 				
 				UI.AddChild(balanceRight);
 				UI.AddChild(balanceLeft);
+				AutoBalance.initialized = true;
 			}
 			catch (Exception e)
 			{
@@ -76,7 +75,7 @@ namespace YaogUI
 			}
 		}
 	}
-	[HarmonyDebug]
+
 	[HarmonyPatch(typeof(Wnd_SchoolTrade), "OnShowUpdate")]
 	public static class AutoBalance_Wnd_SchoolTrade_OnShowOrUpdate
 	{
@@ -94,7 +93,7 @@ namespace YaogUI
 					// Maaan this is so stupid...
 					TreeView tradeList;
 					TreeView tradeSelect;
-					if (balanceButton == AutoBalance.balanceRightBtn)
+					if (balanceButton.name == "YaogUI.BalanceRight")
 					{
 						// Balance Sell List
 						var list = __instance.GetParts()[3] as TradeSaleList;
