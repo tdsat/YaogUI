@@ -152,6 +152,39 @@ namespace YaogUI
 				Main.Debug(e.ToString());
 			}
 		}
+		[HarmonyPostfix]
+		public static void AltClickToBalance(Wnd_SchoolTrade __instance)
+		{
+			var buyList = __instance.GetParts()[2] as TradeBuyList;
+			var leftTree = Traverse.Create(buyList).Field("leftTree").GetValue<TreeView>();
+			var leftSelect = Traverse.Create(buyList).Field("leftSelect").GetValue<TreeView>();
+	
+			leftTree.onClickNode.Add(BalanceSheets);
+			return;
+	
+			void BalanceSheets(EventContext context)
+			{
+				var node = context.data as TreeNode;
+				var tradeItem = node.data2 as TradeItem;
+				if (!context.inputEvent.alt || tradeItem?.ItemName != "Item_LingStone") return;
+				
+				Main.Debug($"Node id {node.parent.GetChildIndex(node)}");
+				
+				var sellValue = Traverse.Create(__instance).Method("GetRightSelectValue").GetValue<TradePrice>();
+				var buyValue = Traverse.Create(__instance).Method("GetLeftSelectValue").GetValue<TradePrice>();
+				// These can be null if there are no items being bought/sold
+				var sellPrice = sellValue?.Value ?? 0;
+				var buyPrice = buyValue?.Value ?? 0;
+				int difference = sellPrice - buyPrice;
+				// We need to subtract one because there's already a click handler to move 1 spirit stone
+				if (difference - 1 > 0)
+				{
+					Traverse.Create(buyList).Method("ToSelect", new[]
+							{ typeof(TreeNode), typeof(TreeView), typeof(int) }, new object[] { node, leftSelect, difference - 1 })
+						.GetValue();
+				}
+			}
+		}
 	}
 
 	// public static void Postfix(Wnd_SchoolTrade __instance)
