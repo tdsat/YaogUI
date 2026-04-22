@@ -3,6 +3,7 @@ using FairyGUI;
 using HarmonyLib;
 using XiaWorld;
 using System.Linq;
+using JetBrains.Annotations;
 
 namespace YaogUI
 {
@@ -12,11 +13,46 @@ namespace YaogUI
 		public static GButton balanceRightBtn;
 		public static GButton balanceLeftBtn;
 
-		public static void BalanceTradeNodes(TreeView tradeList, TreeView selectList, TreeNode spiritStoneNode)
+		public static void BalanceTradeNodes(EventContext context)
 		{
+			var balanceButton = (GButton)context.sender;
+			Main.Debug($"Going through {balanceButton.name}");
+			// Maaan this is so stupid...
+			TradeSaleList saleList = null;
+			TradeBuyList buyList = null;
+			TreeView itemTree;
+			TreeView tradeSelect;
+
+			// Figure out which list we're balancing based on the button pressed. Need different handling due to 
+			// different types/field names
+			if (balanceButton.name == "YaogUI.BalanceRight")
+			{
+				// Balance Sell List
+				saleList = (TradeSaleList)Wnd_SchoolTrade.Instance.GetParts()[3];
+				itemTree = Traverse.Create(saleList).Field("rightTree").GetValue<TreeView>();
+				tradeSelect = Traverse.Create(saleList).Field("rightSelect").GetValue<TreeView>();
+			}
+			else
+			{
+				// Balance Buy List
+				buyList = (TradeBuyList)Wnd_SchoolTrade.Instance.GetParts()[2];
+				itemTree = Traverse.Create(buyList).Field("leftTree").GetValue<TreeView>();
+				tradeSelect = Traverse.Create(buyList).Field("leftSelect").GetValue<TreeView>();
+			}
+
+			// Find spirit stone node
+			TreeNode spiritStoneNode = GetSpiritStonNode(itemTree);
+			if (spiritStoneNode == null)
+			{
+				balanceButton.tooltips = TFMgr.Get("未找到灵石");
+				return;
+			}
+
 			// var tradeItem = node.data2 as TradeItem;
-			var sellValue = Traverse.Create(Wnd_SchoolTrade.Instance).Method("GetRightSelectValue").GetValue<TradePrice>();
-			var buyValue = Traverse.Create(Wnd_SchoolTrade.Instance).Method("GetLeftSelectValue").GetValue<TradePrice>();
+			var sellValue = Traverse.Create(Wnd_SchoolTrade.Instance).Method("GetRightSelectValue")
+				.GetValue<TradePrice>();
+			var buyValue = Traverse.Create(Wnd_SchoolTrade.Instance).Method("GetLeftSelectValue")
+				.GetValue<TradePrice>();
 			// These can be null if there are no items being bought/sold
 			var sellPrice = sellValue?.Value ?? 0;
 			var buyPrice = buyValue?.Value ?? 0;
@@ -24,12 +60,51 @@ namespace YaogUI
 
 			if (difference != 0)
 			{
-				Traverse.Create(tradeList).Method("ToSelect", new[]
-							{ typeof(TreeNode), typeof(TreeView), typeof(int) }, new object[] { spiritStoneNode, selectList, difference })
-					.GetValue();
+				if (saleList != null)
+				{
+					Traverse.Create(saleList).Method("ToSelect", new[]
+								{ typeof(TreeNode), typeof(TreeView), typeof(int) },
+							new object[] { spiritStoneNode, tradeSelect, difference * -1 })
+						.GetValue();
+					saleList.ValueChange();
+				}
+
+				if (buyList != null)
+				{
+					Traverse.Create(buyList).Method("ToSelect", new[]
+								{ typeof(TreeNode), typeof(TreeView), typeof(int) },
+							new object[] { spiritStoneNode, tradeSelect, difference })
+						.GetValue();
+					buyList.ValueChange();
+				}
 			}
 		}
+
+		[CanBeNull]
+		public static TreeNode GetSpiritStonNode(TreeView itemTree)
+		{
+			for (int i = 0; i < itemTree.list.numChildren; i++)
+			{
+				var node = (TreeNode)itemTree.list.GetChildAt(i).data;
+				if (node.data2 != null)
+				{
+					// node.data2 is either a string or a TradeItem. There's probably a function that finds it
+					// but I have no idea which so we do it by hand. 
+					if (node.data2 is TradeItem v)
+					{
+						if (v.ItemName == "Item_LingStone") return node;
+					}
+					else
+					{
+						if ((string)node.data2 == "Item_LingStone") return node;
+					}
+				}
+			}
+
+			return null;
+		}
 	}
+
 	[HarmonyPatch(typeof(Wnd_SchoolTrade), "OnInit")]
 	public static class AutoBalance_Wnd_SchoolTrade_OnInit
 	{
@@ -40,8 +115,9 @@ namespace YaogUI
 			try
 			{
 				var UI = __instance.UIInfo;
-				
-				var balanceRight = AutoBalance.balanceRightBtn ?? (GButton) UIPackage.CreateObjectFromURL("ui://ncbwb41mv9j6ah");
+
+				var balanceRight = AutoBalance.balanceRightBtn ??
+				                   (GButton)UIPackage.CreateObjectFromURL("ui://ncbwb41mv9j6ah");
 				balanceRight.name = "YaogUI.BalanceRight";
 				balanceRight.text = TFMgr.Get("平衡");
 				balanceRight.tooltips = TFMgr.Get("点击使用灵石平衡交易。");
@@ -49,7 +125,8 @@ namespace YaogUI
 				balanceRight.y = 65;
 				AutoBalance.balanceRightBtn = balanceRight;
 
-				var balanceLeft = AutoBalance.balanceLeftBtn ?? (GButton)UIPackage.CreateObjectFromURL("ui://ncbwb41mv9j6ah");
+				var balanceLeft = AutoBalance.balanceLeftBtn ??
+				                  (GButton)UIPackage.CreateObjectFromURL("ui://ncbwb41mv9j6ah");
 				balanceLeft.name = "YaogUI.BalanceLeft";
 				balanceLeft.text = balanceRight.text;
 				balanceLeft.tooltips = balanceRight.tooltips;
@@ -64,7 +141,9 @@ namespace YaogUI
 					UI.RemoveChild(UI.GetChild("YaogUI.BalanceRight"));
 				UI.RemoveChild(balanceLeft);
 				UI.RemoveChild(balanceRight);
-				
+
+				balanceRight.onClick.Add(AutoBalance.BalanceTradeNodes);
+				balanceLeft.onClick.Add(AutoBalance.BalanceTradeNodes);
 				UI.AddChild(balanceRight);
 				UI.AddChild(balanceLeft);
 				AutoBalance.initialized = true;
@@ -80,96 +159,21 @@ namespace YaogUI
 	public static class AutoBalance_Wnd_SchoolTrade_OnShowOrUpdate
 	{
 		[HarmonyPostfix]
-		public static void AddAutoBalanceFunctionality(Wnd_SchoolTrade __instance)
-		{
-			try
-			{
-				var b1 = (GButton) __instance.UIInfo.GetChild("YaogUI.BalanceLeft");
-				var b2 = (GButton) __instance.UIInfo.GetChild("YaogUI.BalanceRight");
-				
-				foreach (var balanceButton in new[] {b1, b2})
-				{
-					Main.Debug($"Going through {balanceButton.name}");
-					// Maaan this is so stupid...
-					TreeView tradeList;
-					TreeView tradeSelect;
-					if (balanceButton.name == "YaogUI.BalanceRight")
-					{
-						// Balance Sell List
-						var list = __instance.GetParts()[3] as TradeSaleList;
-						tradeList = Traverse.Create(list).Field("rightTree").GetValue<TreeView>();
-						tradeSelect = Traverse.Create(list).Field("rightSelect").GetValue<TreeView>();
-					}
-					else
-					{
-						// Balance Buy List
-						var list = __instance.GetParts()[2] as TradeBuyList;
-						tradeList = Traverse.Create(list).Field("leftTree").GetValue<TreeView>();
-						tradeSelect = Traverse.Create(list).Field("leftSelect").GetValue<TreeView>();
-					}
-
-					// Find spirit stone node
-					TreeNode spiritStoneNode = null;
-					Main.Debug($"Found {tradeList.list.numItems} for {balanceButton.name}");
-					for (int i = 0; i < tradeList.list.numItems; i++)
-					{
-						var node = (TreeNode)tradeList.list.GetChildAt(i).data;
-						if (node.data2 != null)
-						{
-							if (((TradeItem) node.data2).ItemName == "Item_LingStone")
-							{
-								spiritStoneNode = node;
-								Main.Debug($"Ling node at {tradeList.GetNodeIndex(node)}");
-								break;
-							}
-
-						}
-					}
-
-					if (spiritStoneNode == null)
-					{
-						balanceButton.enabled = false;
-						balanceButton.tooltips = TFMgr.Get("点击使用灵石平衡交易。");
-						return;
-					}
-
-					balanceButton.enabled = true;
-					balanceButton.tooltips = TFMgr.Get("点击使用灵石平衡交易。");
-
-					Main.Debug("Adding on click handler");
-					balanceButton.onClick.Add(e =>
-					{
-						Main.Debug("Balance this!");
-						AutoBalance.BalanceTradeNodes(tradeList, tradeSelect, spiritStoneNode);
-					});
-					
-					// __instance.UIInfo.RemoveChild(balanceButton);
-					// __instance.UIInfo.AddChild(balanceButton);
-				}
-			}
-			catch (Exception e)
-			{
-				Main.Debug(e.ToString());
-			}
-		}
-		[HarmonyPostfix]
 		public static void AltClickToBalance(Wnd_SchoolTrade __instance)
 		{
 			var buyList = __instance.GetParts()[2] as TradeBuyList;
 			var leftTree = Traverse.Create(buyList).Field("leftTree").GetValue<TreeView>();
 			var leftSelect = Traverse.Create(buyList).Field("leftSelect").GetValue<TreeView>();
-	
+
 			leftTree.onClickNode.Add(BalanceSheets);
 			return;
-	
+
 			void BalanceSheets(EventContext context)
 			{
 				var node = context.data as TreeNode;
 				var tradeItem = node.data2 as TradeItem;
 				if (!context.inputEvent.alt || tradeItem?.ItemName != "Item_LingStone") return;
-				
-				Main.Debug($"Node id {node.parent.GetChildIndex(node)}");
-				
+
 				var sellValue = Traverse.Create(__instance).Method("GetRightSelectValue").GetValue<TradePrice>();
 				var buyValue = Traverse.Create(__instance).Method("GetLeftSelectValue").GetValue<TradePrice>();
 				// These can be null if there are no items being bought/sold
@@ -186,39 +190,4 @@ namespace YaogUI
 			}
 		}
 	}
-
-	// public static void Postfix(Wnd_SchoolTrade __instance)
-	// {
-	// 	// var npc = Traverse.Create(__instance).Field("iconNpc").GetValue<Npc>();
-	// 	// Main.Debug($"OnInit: {npc.GetName()}");
-	// 	var buyList = __instance.GetParts()[2] as TradeBuyList;
-	// 	var leftTree = Traverse.Create(buyList).Field("leftTree").GetValue<TreeView>();
-	// 	var leftSelect = Traverse.Create(buyList).Field("leftSelect").GetValue<TreeView>();
-	//
-	// 	leftTree.onClickNode.Add(BalanceSheets);
-	// 	return;
-	//
-	// 	void BalanceSheets(EventContext context)
-	// 	{
-	// 		var node = context.data as TreeNode;
-	// 		var tradeItem = node.data2 as TradeItem;
-	// 		Main.Debug($"Item name: {tradeItem.ItemName}");
-	// 		if (!context.inputEvent.alt || tradeItem.ItemName != "Item_LingStone") return;
-	// 		var sellValue = Traverse.Create(__instance).Method("GetRightSelectValue").GetValue<TradePrice>();
-	// 		var buyValue = Traverse.Create(__instance).Method("GetLeftSelectValue").GetValue<TradePrice>();
-	// 		// These can be null if there are no items being bought/sold
-	// 		var sellPrice = sellValue?.Value ?? 0;
-	// 		var buyPrice = buyValue?.Value ?? 0;
-	// 		Main.Debug($"sellPrice price = {sellPrice}");
-	// 		Main.Debug($"buyPrice price = {buyPrice}");
-	// 		int difference = sellPrice - buyPrice;
-	// 		// We need to subtract one because there's already a click handler to move 1 spirit stone
-	// 		if (difference - 1 > 0)
-	// 		{
-	// 			Traverse.Create(buyList).Method("ToSelect", new[]
-	// 					{ typeof(TreeNode), typeof(TreeView), typeof(int) }, new object[] { node, leftSelect, difference - 1 })
-	// 				.GetValue();
-	// 		}
-	// 	}
-	// }
 }
