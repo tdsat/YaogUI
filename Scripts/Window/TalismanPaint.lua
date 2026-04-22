@@ -13,6 +13,7 @@ local Wnd_FuPatinter = CS.Wnd_FuPatinter.Instance;
 	SearchInput.y = SearchInput.y + 10;
 	SearchInput.width = 120;
 	SearchInput.onKeyDown:Add(FilterTalismanList);
+	SearchInput:GetTextField():RequestFocus();
 	-- Clear search on window close
 	Wnd_FuPatinter.onRemovedFromStage:Add(ClearSearchInput)
 end
@@ -50,6 +51,9 @@ function TalismanPaint:OnEnter()
 	Wnd_FuPatinter.onPositionChanged:Add(function()
 		AddSearchInput();
 		ChangeList();
+		Wnd_FuPatinter.onAddedToStage:Add(function()
+			Wnd_FuPatinter.contentPane:GetChild('YaogUI.TalismanSearch'):GetTextField():RequestFocus();
+		end)
 		Wnd_FuPatinter.onPositionChanged:Clear();
 	end);
 end
