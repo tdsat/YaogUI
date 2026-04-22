@@ -63,7 +63,8 @@
     <Compile Include="MiscEdits.cs" />
     <Compile Include="SectPower.cs" />
     <Compile Include="Npc.cs" />
-    <Compile Include="TradeWindow.cs" />
+    <Compile Include="TradeWindowAutoBalance.cs" />
+    <Compile Include="TradeWindowSearch.cs" />
     <Compile Include="StorageArea.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
