@@ -15,7 +15,6 @@ namespace YaogUI
 		public static UI_ClearableInput sellSearchInput;
 		public static UI_ClearableInput buySearchInput;
 		public static UI_TradeCategoryList categoryList;
-		public static readonly string CategoryPanel = "YaogUI.CategoryPanel";
 
 		public static bool ignoreWorthlessItems;
 
@@ -28,6 +27,9 @@ namespace YaogUI
 			categoryList.visible = false;
 			sellSearchInput.visible = false;
 			buySearchInput.visible = false;
+			// Not sure if it's a good idea doing this here. Will keep an eye...
+			AutoBalance.balanceLeftBtn.visible = false;
+			AutoBalance.balanceRightBtn.visible = false;
 		}
 	}
 
@@ -40,15 +42,12 @@ namespace YaogUI
 			{
 				UI_TradeCategoryList categoryPanel;
 
-				if (__instance.UIInfo.GetChild(TradeWindowFields.CategoryPanel) == null)
+				if ((categoryPanel = TradeWindowFields.categoryList) == null)
 				{
-					categoryPanel = UI_TradeCategoryList.CreateInstance();
-					categoryPanel.name = TradeWindowFields.CategoryPanel;
+					TradeWindowFields.categoryList = UI_TradeCategoryList.CreateInstance();
+					categoryPanel = TradeWindowFields.categoryList;
+					categoryPanel.name = "YaogUI.CategoryPanel";
 					__instance.UIInfo.AddChild(categoryPanel);
-				}
-				else
-				{
-					categoryPanel = (UI_TradeCategoryList)__instance.UIInfo.GetChild(TradeWindowFields.CategoryPanel);
 				}
 
 				TradeWindowFields.sellSearchInput.visible = true;
@@ -140,6 +139,7 @@ namespace YaogUI
 			{
 				var tradeWindow = __instance;
 				TradeWindowFields.sellSearchInput = UI_ClearableInput.CreateInstance();
+				TradeWindowFields.sellSearchInput.name = "YaogUI.SellSearchInput";
 				var searchInput = TradeWindowFields.sellSearchInput;
 				var clearSearchBtn = searchInput.m_clearButton;
 
@@ -204,6 +204,7 @@ namespace YaogUI
 			{
 				var tradeWindow = __instance;
 				TradeWindowFields.buySearchInput = UI_ClearableInput.CreateInstance();
+				TradeWindowFields.buySearchInput.name = "YaogUI.BuySearchInput";
 				var searchInput = TradeWindowFields.buySearchInput;
 				var clearSearchBtn = searchInput.m_clearButton;
 
