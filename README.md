@@ -14,6 +14,9 @@ Releases can be downloaded from [NexusMods](https://www.nexusmods.com/amazingcul
 - Sold items are sorted alphabetically
 - Added a checkbox to exclude worthless items from the list
   - By worthless I mean items that have a trade value of 0, not useless.
+- Added buttons to balance trade using spirit stones
+  - This works by adding/removing Spirit Stones to the trade so that the values match
+  - You can select which side of the trade you want to balance
 
 ##### How to add custom presets
 You can add custom presets by creating a `custom_presets.xml` and adding your own. You can use the `storage_presets_sample.xml`
@@ -42,7 +45,8 @@ The simplest way to add custom presets is to copy the `default_presets.xml` and 
 # Development
 
 > NOTE : The build project is no longer guaranteed to work out-of-box. I don't use Windows anymore and can't be bothered to test/fix it
-> It _should_ work, but might need some changes WRT to required assemblies etc.
+> It _should_ work, but might need some changes around the required assemblies
+> That being said, all the required source files are included
 
 The `Source` folder (hopefully) contains everything related to this mod. You can safely remove that folder if you are not interested in development.
  
@@ -58,7 +62,6 @@ This is a non-exhaustive list that I plan to work on. I can't give any promises 
  - [ ] Ability to save/favorite talismans
 	-  Need to figure out how saves work
  - [X] Search in trade window
- - [ ] Pin common trade items to top of trade window (like Spirit Stones/Crystals etc)
  - [ ] Improve the inner disciples spell list
  - [ ] Make features optional through the UI
  - [ ] Add more options to the sidebar message configuration (e.g. "Ignore 'There is a fire' messages" etc)
