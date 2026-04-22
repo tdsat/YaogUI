@@ -159,6 +159,13 @@ namespace YaogUI
 	public static class AutoBalance_Wnd_SchoolTrade_OnShowOrUpdate
 	{
 		[HarmonyPostfix]
+		public static void MakeButtonsVisible(Wnd_SchoolTrade __instance)
+		{
+			AutoBalance.balanceLeftBtn.visible  = true;
+			AutoBalance.balanceRightBtn.visible = true;
+		}
+
+		[HarmonyPostfix]
 		public static void AltClickToBalance(Wnd_SchoolTrade __instance)
 		{
 			var buyList = __instance.GetParts()[2] as TradeBuyList;

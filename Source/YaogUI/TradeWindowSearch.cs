@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace YaogUI
 {
-	public static class TradeWindowFields
+	public static class TradeWindowSearch
 	{
 		public static List<string> ignoreItemsList = new List<string>();
 		public static TradePriceDef priceDef;
@@ -31,6 +31,57 @@ namespace YaogUI
 			AutoBalance.balanceLeftBtn.visible = false;
 			AutoBalance.balanceRightBtn.visible = false;
 		}
+		
+		public static void FilterSellList()
+		{
+			var tradeWindow = Wnd_SchoolTrade.Instance;
+			var list = tradeWindow.UIInfo.m_rightitem;
+			var items = list.GetChildren();
+			var searchText = TradeWindowSearch.sellSearchInput.text.ToLower();
+
+			// Meh... this can be simplified but w/e
+			var callbacks = new List<Func<UI_TradeItem, bool>>
+			{
+				item => item.m_itemname.text.ToLower().Contains(searchText)
+			};
+			if (TradeWindowSearch.ignoreWorthlessItems)
+			{
+				callbacks.Add(item => !TradeWindowSearch.ignoreItemsList.Contains(item.name));
+			}
+
+			foreach (UI_TradeItem item in items)
+			{
+				item.visible = callbacks.TrueForAll(x => x(item));
+			}
+		}
+
+		public static void ClearSellSearch()
+		{
+			var searchField = TradeWindowSearch.sellSearchInput;
+			searchField.text = "";
+			FilterSellList();
+		}
+		
+		
+		public static void FilterBuyList()
+		{
+			var tradeWindow = Wnd_SchoolTrade.Instance;
+			var list = tradeWindow.UIInfo.m_leftitem;
+			var items = list.GetChildren();
+			var searchText = TradeWindowSearch.buySearchInput.text.ToLower();
+
+			foreach (UI_TradeItem item in items)
+			{
+				item.visible = item.m_typename.text == "ItemType" ||
+				               item.m_itemname.text.ToLower().Contains(searchText);
+			}
+		}
+
+		public static void ClearBuySearch()
+		{
+			TradeWindowSearch.buySearchInput.text = "";
+			FilterBuyList();
+		}
 	}
 
 	[HarmonyPatch(typeof(Wnd_SchoolTrade), "OnShowUpdate")]
@@ -40,18 +91,19 @@ namespace YaogUI
 		{
 			try
 			{
+				TradeWindowSearch.sellSearchInput.onKeyDown.Add(TradeWindowSearch.FilterSellList);
 				UI_TradeCategoryList categoryPanel;
 
-				if ((categoryPanel = TradeWindowFields.categoryList) == null)
+				if ((categoryPanel = TradeWindowSearch.categoryList) == null)
 				{
-					TradeWindowFields.categoryList = UI_TradeCategoryList.CreateInstance();
-					categoryPanel = TradeWindowFields.categoryList;
+					TradeWindowSearch.categoryList = UI_TradeCategoryList.CreateInstance();
+					categoryPanel = TradeWindowSearch.categoryList;
 					categoryPanel.name = "YaogUI.CategoryPanel";
 					__instance.UIInfo.AddChild(categoryPanel);
 				}
 
-				TradeWindowFields.sellSearchInput.visible = true;
-				TradeWindowFields.buySearchInput.visible = true;
+				TradeWindowSearch.sellSearchInput.visible = true;
+				TradeWindowSearch.buySearchInput.visible = true;
 				categoryPanel.visible = true;
 				var sellItemList = __instance.UIInfo.m_rightitem;
 
@@ -79,11 +131,11 @@ namespace YaogUI
 				categoryPanel.height = categoryList.numItems * 30 + 65;
 				categoryPanel.m_hideWorthlessCheckbox.onClick.Add(e =>
 				{
-					TradeWindowFields.ignoreWorthlessItems = ((GButton)e.sender).selected;
-					AddTradeWindowSellItemSearch.FilterSellList();
+					TradeWindowSearch.ignoreWorthlessItems = ((GButton)e.sender).selected;
+					TradeWindowSearch.FilterSellList();
 				});
-				TradeWindowFields.ignoreWorthlessItems = categoryPanel.m_hideWorthlessCheckbox.selected;
-				TradeWindowFields.ignoreItemsList.Clear();
+				TradeWindowSearch.ignoreWorthlessItems = categoryPanel.m_hideWorthlessCheckbox.selected;
+				TradeWindowSearch.ignoreItemsList.Clear();
 				// Build a local cache of worthless items.
 				var saleList = __instance.GetParts()[3] as TradeSaleList;
 				var rightTree = Traverse.Create(saleList).Field("rightTree").GetValue<TreeView>();
@@ -99,14 +151,14 @@ namespace YaogUI
 						TradeSaleList.NodeData nodeData = saleList.TNode2NodeData(itemNode);
 						var itemName = itemNode.data as string;
 
-						TradePrice tradeValue = TradeWindowFields.priceDef
+						TradePrice tradeValue = TradeWindowSearch.priceDef
 							.GetItemPrice(nodeData.ItemName, nodeData.Rate).SalePrice;
 						var finalPrice = iData.ScaleSalePrice(tradeValue.Value, nodeData.ItemName);
 						// Main.Debug($"Final price for {nodeData.ItemName} with value of {finalPrice}");
 
 						if (finalPrice < 1)
 						{
-							TradeWindowFields.ignoreItemsList.Add(nodeData.ItemName);
+							TradeWindowSearch.ignoreItemsList.Add(nodeData.ItemName);
 						}
 
 						// While we're at it, also sort the items in each folder by name
@@ -138,9 +190,9 @@ namespace YaogUI
 			try
 			{
 				var tradeWindow = __instance;
-				TradeWindowFields.sellSearchInput = UI_ClearableInput.CreateInstance();
-				TradeWindowFields.sellSearchInput.name = "YaogUI.SellSearchInput";
-				var searchInput = TradeWindowFields.sellSearchInput;
+				TradeWindowSearch.sellSearchInput = UI_ClearableInput.CreateInstance();
+				TradeWindowSearch.sellSearchInput.name = "YaogUI.SellSearchInput";
+				var searchInput = TradeWindowSearch.sellSearchInput;
 				var clearSearchBtn = searchInput.m_clearButton;
 
 				var list = tradeWindow.UIInfo.m_rightitem;
@@ -150,10 +202,10 @@ namespace YaogUI
 				searchInput.y = list.y - 40;
 				searchInput.width = list.width;
 
-				searchInput.onKeyDown.Add(FilterSellList);
-				clearSearchBtn.onClick.Add(ClearSellSearch);
+				searchInput.onKeyDown.Add(TradeWindowSearch.FilterSellList);
+				clearSearchBtn.onClick.Add(TradeWindowSearch.ClearSellSearch);
 				// Search again when switching schools since items have changed
-				tradeWindow.UIInfo.m_n51.onClickItem.Add(ClearSellSearch);
+				tradeWindow.UIInfo.m_n51.onClickItem.Add(TradeWindowSearch.ClearSellSearch);
 
 				tradeWindow.UIInfo.AddChild(searchInput);
 			}
@@ -162,38 +214,7 @@ namespace YaogUI
 				Main.Debug(e.ToString());
 			}
 		}
-
-		public static void FilterSellList()
-		{
-			var tradeWindow = Wnd_SchoolTrade.Instance;
-			var list = tradeWindow.UIInfo.m_rightitem;
-			var items = list.GetChildren();
-			var searchText = TradeWindowFields.sellSearchInput.text.ToLower();
-
-			// Meh... this can be simplified but w/e
-			var callbacks = new List<Func<UI_TradeItem, bool>>
-			{
-				item => item.m_itemname.text.ToLower().Contains(searchText)
-			};
-			if (TradeWindowFields.ignoreWorthlessItems)
-			{
-				callbacks.Add(item => !TradeWindowFields.ignoreItemsList.Contains(item.name));
-			}
-
-			foreach (UI_TradeItem item in items)
-			{
-				item.visible = callbacks.TrueForAll(x => x(item));
-			}
-		}
-
-		private static void ClearSellSearch()
-		{
-			var searchField = TradeWindowFields.sellSearchInput;
-			searchField.text = "";
-			FilterSellList();
-		}
 	}
-
 
 	[HarmonyPatch(typeof(Wnd_SchoolTrade), "OnInit")]
 	public static class AddTradeWindowBuyItemSearch
@@ -203,9 +224,9 @@ namespace YaogUI
 			try
 			{
 				var tradeWindow = __instance;
-				TradeWindowFields.buySearchInput = UI_ClearableInput.CreateInstance();
-				TradeWindowFields.buySearchInput.name = "YaogUI.BuySearchInput";
-				var searchInput = TradeWindowFields.buySearchInput;
+				TradeWindowSearch.buySearchInput = UI_ClearableInput.CreateInstance();
+				TradeWindowSearch.buySearchInput.name = "YaogUI.BuySearchInput";
+				var searchInput = TradeWindowSearch.buySearchInput;
 				var clearSearchBtn = searchInput.m_clearButton;
 
 				var list = tradeWindow.UIInfo.m_leftitem;
@@ -215,10 +236,10 @@ namespace YaogUI
 				searchInput.y = list.y - 40;
 				searchInput.width = list.width;
 
-				searchInput.onKeyDown.Add(FilterBuyList);
-				clearSearchBtn.onClick.Add(ClearBuySearch);
+				searchInput.onKeyDown.Add(TradeWindowSearch.FilterBuyList);
+				clearSearchBtn.onClick.Add(TradeWindowSearch.ClearBuySearch);
 				// Search again when switching schools since items have changed
-				tradeWindow.UIInfo.m_n51.onClickItem.Add(FilterBuyList);
+				tradeWindow.UIInfo.m_n51.onClickItem.Add(TradeWindowSearch.FilterBuyList);
 
 				tradeWindow.UIInfo.AddChild(searchInput);
 			}
@@ -226,26 +247,6 @@ namespace YaogUI
 			{
 				Main.Debug(e.ToString());
 			}
-		}
-
-		public static void FilterBuyList()
-		{
-			var tradeWindow = Wnd_SchoolTrade.Instance;
-			var list = tradeWindow.UIInfo.m_leftitem;
-			var items = list.GetChildren();
-			var searchText = TradeWindowFields.buySearchInput.text.ToLower();
-
-			foreach (UI_TradeItem item in items)
-			{
-				item.visible = item.m_typename.text == "ItemType" ||
-				               item.m_itemname.text.ToLower().Contains(searchText);
-			}
-		}
-
-		private static void ClearBuySearch()
-		{
-			TradeWindowFields.buySearchInput.text = "";
-			FilterBuyList();
 		}
 	}
 
@@ -259,7 +260,7 @@ namespace YaogUI
 			if (TradeWnd.HasTradeArea())
 			{
 				SchoolTradeDef schoolDef = TradeMgr.Instance.GetSchoolTradeDef(school);
-				TradeWindowFields.priceDef = TradeMgr.Instance.GetPriceDef(schoolDef.Price);
+				TradeWindowSearch.priceDef = TradeMgr.Instance.GetPriceDef(schoolDef.Price);
 			}
 		}
 	}
@@ -274,7 +275,7 @@ namespace YaogUI
 			if (TradeWnd.HasTradeArea())
 			{
 				TradeWalkDef tradeDef = TradeMgr.Instance.GetWalkTradeDef(null);
-				TradeWindowFields.priceDef = TradeMgr.Instance.GetPriceDef(tradeDef.Price);
+				TradeWindowSearch.priceDef = TradeMgr.Instance.GetPriceDef(tradeDef.Price);
 			}
 		}
 	}
@@ -287,7 +288,7 @@ namespace YaogUI
 		{
 			if (__instance.UIInfo.m_state.selectedIndex == 1)
 			{
-				TradeWindowFields.CleanUp();
+				TradeWindowSearch.CleanUp();
 			}
 		}
 	}
