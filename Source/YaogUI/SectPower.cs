@@ -54,8 +54,8 @@ namespace YaogUI
 				faithString.y = 110;
 				faithString.x = 10;
 
-				var height = 10;
-				var width = 70;
+				const int height = 10;
+				const int width = 70;
 
 				//Background
 				faithString.m_n41.height = height;

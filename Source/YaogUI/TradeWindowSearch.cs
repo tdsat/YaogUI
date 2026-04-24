@@ -28,8 +28,10 @@ namespace YaogUI
 			sellSearchInput.visible = false;
 			buySearchInput.visible = false;
 			// Not sure if it's a good idea doing this here. Will keep an eye...
-			AutoBalance.balanceLeftBtn.visible = false;
-			AutoBalance.balanceRightBtn.visible = false;
+			if (AutoBalance.balanceLeftBtn != null)
+				AutoBalance.balanceLeftBtn.visible = false;
+			if (AutoBalance.balanceRightBtn != null)
+				AutoBalance.balanceRightBtn.visible = false;
 		}
 		
 		public static void FilterSellList()
