@@ -22,6 +22,7 @@ namespace YaogUI
 		{
 			if (sellSearchInput != null)
 			{
+				//Clear these events because there's weird case where they still trigger even if the input is not visible
 				sellSearchInput.onKeyDown.Clear();
 				sellSearchInput.visible = false;
 			}
@@ -34,7 +35,6 @@ namespace YaogUI
 
 			if (categoryList != null)
 			{
-				categoryList.m_hideWorthlessCheckbox.RemoveEventListeners();
 				categoryList.visible = false;
 			}
 
@@ -75,7 +75,6 @@ namespace YaogUI
 			FilterSellList();
 		}
 
-
 		public static void FilterBuyList()
 		{
 			var tradeWindow = Wnd_SchoolTrade.Instance;
@@ -97,51 +96,33 @@ namespace YaogUI
 		}
 	}
 
-	[HarmonyPatch(typeof(Wnd_SchoolTrade), "OnInit")]
-	public static class TradeWindowSearchAndFilter
-	{
-		[HarmonyPostfix]
-		public static void AddFields(Wnd_SchoolTrade __instance)
-		{
-			if (TradeWindowSearch.categoryList == null)
-			{
-				TradeWindowSearch.categoryList = UI_TradeCategoryList.CreateInstance();
-				TradeWindowSearch.categoryList.name = "YaogUI.CategoryPanel";
-				TradeWindowSearch.categoryList.visible = true;
-				__instance.UIInfo.AddChild(TradeWindowSearch.categoryList);
-			}
-		}
-	}
-
 	[HarmonyPatch(typeof(Wnd_SchoolTrade), "OnShowUpdate")]
 	public static class AddQuickCategoryListToTradeWindow
 	{
-		public static void Postfix(Wnd_SchoolTrade __instance)
+		[HarmonyPostfix]
+		public static void UpdateCategoryListItems(Wnd_SchoolTrade __instance)
 		{
 			try
 			{
 				var categoryPanel = TradeWindowSearch.categoryList;
 
-				// TradeWindowSearch.sellSearchInput.visible = true;
-				// TradeWindowSearch.buySearchInput.visible = true;
+				TradeWindowSearch.sellSearchInput.visible = true;
+				TradeWindowSearch.buySearchInput.visible = true;
+				// Re-attach keydown events
+				TradeWindowSearch.sellSearchInput.onKeyDown.Add(TradeWindowSearch.FilterSellList);
+				TradeWindowSearch.buySearchInput.onKeyDown.Add(TradeWindowSearch.FilterBuyList);
+				
 				categoryPanel.visible = true;
 				var sellItemList = __instance.UIInfo.m_rightitem;
 
 				var categoryList = categoryPanel.m_list;
 				var items = sellItemList.GetChildren();
-				categoryPanel.m_list = new GList();
-
+				categoryList.RemoveChildrenToPool();
 				// Add link to spirit stone
-
 				var btn = (GButton)categoryList.AddItemFromPool();
 				btn.title = TFMgr.Get("灵石");
 				btn.height = 30;
-				btn.onClick.Set(() => sellItemList.ScrollToView(0, true, true));
-				if (categoryList == null)
-				{
-					Main.Debug("FUck right offff");
-				}
-
+				btn.onClick.Add(() => sellItemList.ScrollToView(0, true, true));
 				foreach (var o in items)
 				{
 					var item = (UI_TradeItem)o;
@@ -153,8 +134,6 @@ namespace YaogUI
 					btn.onClick.Set(() => sellItemList.ScrollToView(index, true, true));
 				}
 
-				categoryPanel.x = sellItemList.x + sellItemList.width;
-				categoryPanel.y = sellItemList.y - 60;
 				categoryPanel.height = categoryList.numItems * 30 + 65;
 				categoryPanel.m_hideWorthlessCheckbox.onClick.Add(e =>
 				{
@@ -219,11 +198,23 @@ namespace YaogUI
 			{
 				AddTradeWindowSellItemSearch(__instance);
 				AddTradeWindowBuyItemSearch(__instance);
+				AddCategoryPanel(__instance);
 			}
 			catch (Exception e)
 			{
 				Main.Debug(e.ToString());
 			}
+		}
+
+		public static void AddCategoryPanel(Wnd_SchoolTrade tradeWindow)
+		{
+			TradeWindowSearch.categoryList = UI_TradeCategoryList.CreateInstance();
+			TradeWindowSearch.categoryList.name = "YaogUI.CategoryPanel";
+			TradeWindowSearch.categoryList.visible = true;
+			tradeWindow.UIInfo.AddChild(TradeWindowSearch.categoryList);
+			// Put it next to the sell list
+			TradeWindowSearch.categoryList.x = tradeWindow.UIInfo.m_rightitem.x + tradeWindow.UIInfo.m_rightitem.width;
+			TradeWindowSearch.categoryList.y = tradeWindow.UIInfo.m_rightitem.y - 60;
 		}
 
 
