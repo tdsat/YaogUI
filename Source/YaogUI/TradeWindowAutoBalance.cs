@@ -2,8 +2,8 @@
 using FairyGUI;
 using HarmonyLib;
 using XiaWorld;
-using System.Linq;
 using JetBrains.Annotations;
+using UnityEngine;
 
 namespace YaogUI
 {
@@ -16,7 +16,6 @@ namespace YaogUI
 		public static void BalanceTradeNodes(EventContext context)
 		{
 			var balanceButton = (GButton)context.sender;
-			Main.Debug($"Going through {balanceButton.name}");
 			// Maaan this is so stupid...
 			TradeSaleList saleList = null;
 			TradeBuyList buyList = null;
@@ -48,35 +47,42 @@ namespace YaogUI
 				return;
 			}
 
-			// var tradeItem = node.data2 as TradeItem;
 			var sellValue = Traverse.Create(Wnd_SchoolTrade.Instance).Method("GetRightSelectValue")
 				.GetValue<TradePrice>();
 			var buyValue = Traverse.Create(Wnd_SchoolTrade.Instance).Method("GetLeftSelectValue")
 				.GetValue<TradePrice>();
+
+			// We need to take price scaling into account when calculating the amount of spirit stones we need to transfer
+			var scale = Traverse.Create(Wnd_SchoolTrade.Instance).Field("_parser").Method("GetSaleScale")
+				.GetValue<float>();
+
 			// These can be null if there are no items being bought/sold
-			var sellPrice = sellValue?.Value ?? 0;
-			var buyPrice = buyValue?.Value ?? 0;
-			int difference = sellPrice - buyPrice;
+			var offerAmount = sellValue?.Value ?? 0;
+			var askingPrice = buyValue?.Value ?? 0;
 
-			if (difference != 0)
+			var offerValue = offerAmount * scale;
+			var finalOffer = Mathf.CeilToInt(offerValue);
+
+			int difference = finalOffer - askingPrice;
+			var toTransfer = Mathf.CeilToInt(askingPrice / scale - offerAmount);
+
+			if (difference == 0) return;
+			if (saleList != null)
 			{
-				if (saleList != null)
-				{
-					Traverse.Create(saleList).Method("ToSelect", new[]
-								{ typeof(TreeNode), typeof(TreeView), typeof(int) },
-							new object[] { spiritStoneNode, tradeSelect, difference * -1 })
-						.GetValue();
-					saleList.ValueChange();
-				}
+				Traverse.Create(saleList).Method("ToSelect", new[]
+							{ typeof(TreeNode), typeof(TreeView), typeof(int) },
+						new object[] { spiritStoneNode, tradeSelect, toTransfer })
+					.GetValue();
+				saleList.ValueChange();
+			}
 
-				if (buyList != null)
-				{
-					Traverse.Create(buyList).Method("ToSelect", new[]
-								{ typeof(TreeNode), typeof(TreeView), typeof(int) },
-							new object[] { spiritStoneNode, tradeSelect, difference })
-						.GetValue();
-					buyList.ValueChange();
-				}
+			if (buyList != null)
+			{
+				Traverse.Create(buyList).Method("ToSelect", new[]
+							{ typeof(TreeNode), typeof(TreeView), typeof(int) },
+						new object[] { spiritStoneNode, tradeSelect, toTransfer * -1 })
+					.GetValue();
+				buyList.ValueChange();
 			}
 		}
 
@@ -159,9 +165,10 @@ namespace YaogUI
 	public static class AutoBalance_Wnd_SchoolTrade_OnShowOrUpdate
 	{
 		[HarmonyPostfix]
+		[HarmonyPriority(Priority.LowerThanNormal)]
 		public static void MakeButtonsVisible(Wnd_SchoolTrade __instance)
 		{
-			AutoBalance.balanceLeftBtn.visible  = true;
+			AutoBalance.balanceLeftBtn.visible = true;
 			AutoBalance.balanceRightBtn.visible = true;
 		}
 
@@ -191,7 +198,8 @@ namespace YaogUI
 				if (difference - 1 > 0)
 				{
 					Traverse.Create(buyList).Method("ToSelect", new[]
-							{ typeof(TreeNode), typeof(TreeView), typeof(int) }, new object[] { node, leftSelect, difference - 1 })
+								{ typeof(TreeNode), typeof(TreeView), typeof(int) },
+							new object[] { node, leftSelect, difference - 1 })
 						.GetValue();
 				}
 			}
