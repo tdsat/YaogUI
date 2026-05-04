@@ -18,14 +18,6 @@ Releases can be downloaded from [NexusMods](https://www.nexusmods.com/amazingcul
   - This works by adding/removing Spirit Stones to the trade so that the values match
   - You can select which side of the trade you want to balance
 
-##### How to add custom presets
-You can add custom presets by creating a `custom_presets.xml` and adding your own. You can use the `storage_presets_sample.xml`
-as a reference since it contains all available options. 
-
-The simplest way to add custom presets is to copy the `default_presets.xml` and rename it to `custom_presets.xml`
-
-> Please note that custom presets will overwrite default ones if they have the same name
-
 ### Talisman Drawing Window
 - Ability to search when crafting item
 - Talisman list also has a new look
@@ -41,6 +33,16 @@ The simplest way to add custom presets is to copy the `default_presets.xml` and 
 - 'X : Hurt' and 'X : injury deteriorating' messages get cleaned if the affected pawn get healed
 - Doubled the material selection columns when building
 - During adventures, when the NPC selection dialog appears, if there's only one NPC in the map they are auto-selected
+- Added search to the School Gift window
+
+##### How to add custom presets
+You can add custom presets by creating a `custom_presets.xml` and adding your own. You can use the `storage_presets_sample.xml`
+as a reference since it contains all available options.
+
+The simplest way to add custom presets is to copy the `default_presets.xml` and rename it to `custom_presets.xml`
+
+> Please note that custom presets will overwrite default ones if they have the same name
+
 
 # Development
 
