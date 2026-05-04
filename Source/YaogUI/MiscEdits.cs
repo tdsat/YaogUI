@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using FairyGUI;
 using XiaWorld;
+using XiaWorld.UI.InGame;
 
 namespace YaogUI
 {
@@ -18,6 +19,15 @@ namespace YaogUI
 				materialList.layout = ListLayoutType.FlowHorizontal;
 				
 				ThingDef def3 = ThingMgr.Instance.GetDef(g_emThingType.Building, data.ObjName);
+				var thingDefList = ThingMgr.Instance.GetBuildingAllStuff(def3.Name);
+				if (thingDefList == null || thingDefList.Count <= 0)
+				{
+					listBg.visible = false;
+					return;
+				}
+
+				// This is some shit code but I can't be bothered tbh...
+				listBg.visible = true;
 				if (def3.Building.BeMade.CostItems != null && def3.Building.BeMade.CostItems.Count > 0)
 				{ // Dual-material thing
 					listBg.width = 220;
