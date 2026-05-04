@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using System;
+using System.Collections.Generic;
 using FairyGUI;
 using XiaWorld;
 
@@ -49,6 +50,42 @@ namespace YaogUI
 			if (__instance.UIInfo.m_n25.numItems == 1)
 			{
 				__instance.UIInfo.m_n25.GetChildAt(0).onClick.Call();
+			}
+		}
+	}
+
+	[HarmonyPatch]
+	public static class ProduceShortcuts
+	
+	{
+		[HarmonyPatch(typeof(Wnd_BuildingProduce), "__clickSelectItem")]
+		[HarmonyPrefix]
+		public static bool HandleShortcuts(Wnd_BuildingProduce __instance, EventContext context)
+		{
+			int data5 = (int) ((GObject) context.data).data5;
+			BuildingThing building = Traverse.Create(__instance).Field("Building").GetValue<BuildingThing>();
+			var produce = building.ProduceMachine.AddTask(data5);
+			ReplayMgr.Instance.RecordCMD((ReplayData) new ReplayCommandBuildingProduce(building.ID, data5, false));
+			if (context.inputEvent.shift)
+			{
+				produce.Count = 10;
+			} else if (context.inputEvent.ctrl)
+			{
+				produce.Count = 50;
+			}
+			return false;
+		}
+
+		[HarmonyPatch(typeof(Wnd_BuildingProduce), "UpdateSelectList")]
+		[HarmonyPostfix]
+		public static void UpdateTooltips(Wnd_BuildingProduce __instance)
+		{
+			List<BuildingProduce.BuildingProduceData> lisProduceMenu = Traverse.Create(__instance).Field("Building")
+				.GetValue<BuildingThing>().ProduceMachine.m_lisProduceMenu;
+			for (int index = 0; index < lisProduceMenu.Count; ++index)
+			{
+				var button = __instance.UIInfo.m_SelectList.GetChildAt(index);
+				button.tooltips += TFMgr.Get("[color=#9e6404]\n\nShift+单击：x10\nCtrl+单击：x50[/color]");
 			}
 		}
 	}

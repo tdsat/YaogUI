@@ -35,6 +35,7 @@ Releases can be downloaded from [NexusMods](https://www.nexusmods.com/amazingcul
 - During adventures, when the NPC selection window appears, if there's only one NPC in the map they are auto-selected
   - If you want to get rid of this interaction entirely, you can use [YodaDoge's ACS Tweaks](https://github.com/YodaDoge/ACSMods/) ([Steam](https://steamcommunity.com/sharedfiles/filedetails/?id=3693376357))
 - Added search to the School Gift window
+- Holding Shift/Ctrl when queueing a production item changes the amount to 10/50 respectively
 
 #### How to add custom presets
 You can add custom presets by creating a `custom_presets.xml` and adding your own. You can use the `storage_presets_sample.xml`

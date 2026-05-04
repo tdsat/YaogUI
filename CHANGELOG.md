@@ -1,6 +1,9 @@
 ## v0.6
 - (School Gift) Added search to the school gift window
 - (Trade Window) Auto-balance now takes into account price scaling based on relations
+- (Production Window) Add shortcuts to quickly queue production items
+  - Shift/Ctr+Click when producing something changes the amount to 10/50 respectively
+  - This is similar to queueing an item and changing the production count
 
 ## v0.5 (23/04/2026)
 - (Trade Window) Added buttons to balance the trade values using spirit stones (if available)
