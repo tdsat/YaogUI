@@ -1,5 +1,6 @@
 ## v0.6
 - (School Gift) Added search to the school gift window
+- (Trade Window) Auto-balance now takes into account price scaling based on relations
 
 ## v0.5 (23/04/2026)
 - (Trade Window) Added buttons to balance the trade values using spirit stones (if available)
