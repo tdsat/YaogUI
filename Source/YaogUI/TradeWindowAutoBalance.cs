@@ -9,7 +9,6 @@ namespace YaogUI
 {
 	public static class AutoBalance
 	{
-		public static bool initialized = false;
 		public static GButton balanceRightBtn;
 		public static GButton balanceLeftBtn;
 
@@ -117,7 +116,6 @@ namespace YaogUI
 		[HarmonyPostfix]
 		public static void AddBalanceButtons(Wnd_SchoolTrade __instance)
 		{
-			if (AutoBalance.initialized) return; //Another attempt to avoid MLL. Fuck this shit honestly
 			try
 			{
 				var UI = __instance.UIInfo;
@@ -140,11 +138,6 @@ namespace YaogUI
 				balanceLeft.y = 65;
 				AutoBalance.balanceLeftBtn = balanceLeft;
 
-				//MLL Hacks...
-				if (UI.GetChild("YaogUI.BalanceLeft") != null)
-					UI.RemoveChild(UI.GetChild("YaogUI.BalanceLeft"));
-				if (UI.GetChild("YaogUI.BalanceRight") != null)
-					UI.RemoveChild(UI.GetChild("YaogUI.BalanceRight"));
 				UI.RemoveChild(balanceLeft);
 				UI.RemoveChild(balanceRight);
 
@@ -152,7 +145,6 @@ namespace YaogUI
 				balanceLeft.onClick.Add(AutoBalance.BalanceTradeNodes);
 				UI.AddChild(balanceRight);
 				UI.AddChild(balanceLeft);
-				AutoBalance.initialized = true;
 			}
 			catch (Exception e)
 			{
