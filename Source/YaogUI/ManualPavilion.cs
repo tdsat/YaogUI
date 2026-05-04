@@ -12,10 +12,23 @@ namespace YaogUI
 	[HarmonyPatch]
 	public static class ManualPavilionEdits
 	{
-		public static UI_NpcInfoLable yinAttainmentField = UI_NpcInfoLable.CreateInstance();
-		public static UI_NpcInfoLable yangAttainmentField = UI_NpcInfoLable.CreateInstance();
-		public static UI_NpcInfoLable totalAttainmentField = UI_NpcInfoLable.CreateInstance();
-		public static UI_NpcInfoLable attainmentChangeField = UI_NpcInfoLable.CreateInstance();
+		public static UI_NpcInfoLable yinAttainmentField = GetLabelField("YaogUI.YinAttainmentField");
+		public static UI_NpcInfoLable yangAttainmentField = GetLabelField("YaogUI.YangAttainmentField");
+		public static UI_NpcInfoLable totalAttainmentField = GetLabelField("YaogUI.TotalAttainmentField");
+		public static UI_NpcInfoLable attainmentChangeField = GetLabelField("YaogUI.AttainmentChangeField");
+
+		private const int fieldWidth = 40;
+		private const int fieldHeight = 20;
+
+		private static UI_NpcInfoLable GetLabelField(string name)
+		{
+			var field = UI_NpcInfoLable.CreateInstance();
+			field.name = name;
+			field.height = fieldHeight;
+			field.width = fieldWidth;
+
+			return field;
+		}
 
 		public static void CreateFields(Wnd_CangJingGeWindow __instance)
 		{
@@ -23,41 +36,49 @@ namespace YaogUI
 			var bgImage = new GImage();
 			bgImage.texture = mainPane.m_n5.texture;
 			// Cool magic numbers
-			bgImage.width = 200;
+			bgImage.width = 240;
 			bgImage.height = 100;
 			bgImage.x = 800;
 			bgImage.y = 490;
 
 			yinAttainmentField.color = Color.white;
 			yangAttainmentField.color = Color.black;
-			// bro I can't believe I miss CSS...
-			var firstRow = bgImage.y + 10;
-			var firstCol = bgImage.x + 10;
+			totalAttainmentField.color = new Color32(255, 191, 0, 255);
+			totalAttainmentField.fontsize += 2;
 
-			yinAttainmentField.width = yangAttainmentField.width =
-				totalAttainmentField.width = attainmentChangeField.width = 40;
-			yinAttainmentField.height = yangAttainmentField.height =
-				totalAttainmentField.height = attainmentChangeField.height = 8;
+			yinAttainmentField.tooltips = TFMgr.Get("阴性造诣");
+			yangAttainmentField.tooltips = TFMgr.Get("阳性造诣");
+			totalAttainmentField.tooltips = $"{TFMgr.Get("所选秘籍的总参悟")}\n\n{TFMgr.Get("降低参悟值的功法不计入计算")}";
+			attainmentChangeField.tooltips = TFMgr.Get("阴阳变化：白色代表阴气较重，黑色代表阳气较重");
 
-			yinAttainmentField.y = yangAttainmentField.y = totalAttainmentField.y = attainmentChangeField.y = firstRow;
-			yinAttainmentField.x = firstCol + 10;
-			yangAttainmentField.x = firstCol + 70;
-			totalAttainmentField.x = firstCol + 130;
-			attainmentChangeField.x = firstCol + 190;
+			totalAttainmentField.height = 22;
+
+			PositionFields(new GComponent[]
+					{ totalAttainmentField, yinAttainmentField, yangAttainmentField, attainmentChangeField }
+				, bgImage.x + 30, bgImage.y + 15, 5);
 
 			ResetFields();
 
-
-			var b2 = (GButton)UIPackage.CreateObjectFromURL("ui://ncbwb41mv9j6ah");
 			mainPane.AddChild(bgImage);
-			mainPane.AddChild(b2);
-
-			b2.onClick.Add(UpdateAttainmentFields);
 
 			mainPane.AddChild(yinAttainmentField);
 			mainPane.AddChild(yangAttainmentField);
 			mainPane.AddChild(totalAttainmentField);
 			mainPane.AddChild(attainmentChangeField);
+			mainPane.m_clearall.onClick.Add(ResetFields);
+		}
+
+		private static void PositionFields(GComponent[] components, float x, float y, float gap = 0f)
+		{
+			GComponent prev = null;
+
+			for (var i = 0; i < components.Length; i++)
+			{
+				var offset = prev == null ? x : prev.x + prev.width + gap;
+				components[i].y = y;
+				components[i].x = offset;
+				prev = components[i];
+			}
 		}
 
 		public static void UpdateAttainmentFields()
@@ -80,12 +101,12 @@ namespace YaogUI
 				EsotericaData manual = EsotericaMgr.Instance.GetSysEsoterica(item);
 
 				totalAttainment += manual.Difficulty;
-				if (manual.Element == g_emElementKind.None || manual.Element == g_emElementKind.Tu)
+				if (manual.GetYinyang() == 0) //Neutral
 				{
 					totalYin += manual.Difficulty;
 					totalYang += manual.Difficulty;
 				}
-				else if (manual.Element == g_emElementKind.Jin || manual.Element == g_emElementKind.Shui)
+				else if (manual.GetYinyang() == -1)
 				{
 					totalYin += manual.Difficulty;
 				}
@@ -128,8 +149,6 @@ namespace YaogUI
 			{
 				Main.Debug(e.ToString());
 			}
-
-			;
 		}
 
 		[HarmonyPatch(typeof(Wnd_CangJingGeWindow), "OnShowUpdate")]
@@ -140,7 +159,7 @@ namespace YaogUI
 		}
 
 
-		[HarmonyPatch(typeof(Wnd_CangJingGeWindow), "CollectEso")]
+		[HarmonyPatch(typeof(Wnd_CangJingGeWindow), "SetSelect")]
 		[HarmonyPostfix]
 		public static void OnCollectEso(Wnd_CangJingGeWindow __instance)
 		{
