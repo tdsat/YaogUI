@@ -11,15 +11,14 @@ namespace YaogUI
 	[HarmonyPatch]
 	public static class ManualPavilionEdits
 	{
-		public static UI_NpcInfoLable yinAttainmentField = GetLabelField("YaogUI.YinAttainmentField");
-		public static UI_NpcInfoLable yangAttainmentField = GetLabelField("YaogUI.YangAttainmentField");
-		public static UI_NpcInfoLable totalAttainmentField = GetLabelField("YaogUI.TotalAttainmentField");
-		public static UI_NpcInfoLable attainmentChangeField = GetLabelField("YaogUI.AttainmentChangeField");
-
-		public static UI_NpcInfoLable NPCYinAttainmentField = GetLabelField("YaogUI.NPCYinAttainmentField");
-		public static UI_NpcInfoLable NPCYangAttainmentField = GetLabelField("YaogUI.NPCYangAttainmentField");
-		public static UI_NpcInfoLable NPCTotalAttainmentField = GetLabelField("YaogUI.NPCTotalAttainmentField");
-		public static UI_NpcInfoLable NPCAttainmentChangeField = GetLabelField("YaogUI.NPCAttainmentChangeField");
+		public static UI_NpcInfoLable yinAttainmentField;
+		public static UI_NpcInfoLable yangAttainmentField;
+		public static UI_NpcInfoLable totalAttainmentField;
+		public static UI_NpcInfoLable attainmentChangeField;
+		public static UI_NpcInfoLable npcYinAttainmentField;
+		public static UI_NpcInfoLable npcYangAttainmentField;
+		public static UI_NpcInfoLable npcTotalAttainmentField;
+		public static UI_NpcInfoLable npcAttainmentChangeField;
 
 		private const int fieldWidth = 40;
 		private const int fieldHeight = 20;
@@ -37,6 +36,16 @@ namespace YaogUI
 
 		public static void CreateFields(Wnd_CangJingGeWindow __instance)
 		{
+			yinAttainmentField = GetLabelField("YaogUI.YinAttainmentField");
+			yangAttainmentField = GetLabelField("YaogUI.YangAttainmentField");
+			totalAttainmentField = GetLabelField("YaogUI.TotalAttainmentField");
+			attainmentChangeField = GetLabelField("YaogUI.AttainmentChangeField");
+
+			npcYinAttainmentField = GetLabelField("YaogUI.NPCYinAttainmentField");
+			npcYangAttainmentField = GetLabelField("YaogUI.NPCYangAttainmentField");
+			npcTotalAttainmentField = GetLabelField("YaogUI.NPCTotalAttainmentField");
+			npcAttainmentChangeField = GetLabelField("YaogUI.NPCAttainmentChangeField");
+
 			var mainPane = (UI_CangJingGeWindow)__instance.contentPane;
 			var bgImage = new GImage();
 			bgImage.texture = mainPane.m_n5.texture;
@@ -60,7 +69,7 @@ namespace YaogUI
 			PositionFields(new GComponent[]
 					{ totalAttainmentField, yinAttainmentField, yangAttainmentField, attainmentChangeField }
 				, bgImage.x + 35, bgImage.y + 20, 5);
-			
+
 
 			mainPane.AddChild(bgImage);
 
@@ -73,28 +82,28 @@ namespace YaogUI
 			if (npc != null)
 			{
 				PositionFields(new GComponent[]
-						{ NPCTotalAttainmentField, NPCYinAttainmentField, NPCYangAttainmentField, NPCAttainmentChangeField }
+						{ npcTotalAttainmentField, npcYinAttainmentField, npcYangAttainmentField, npcAttainmentChangeField }
 					, bgImage.x + 35, bgImage.y + 60, 5);
-				
-				NPCYinAttainmentField.color = Color.black;
-				NPCYangAttainmentField.color = Color.white;
-				NPCTotalAttainmentField.color = new Color32(255, 191, 0, 255);
-				NPCTotalAttainmentField.fontsize += 2;
-				NPCTotalAttainmentField.height = 22;
-				
-				NPCYinAttainmentField.tooltips = TFMgr.Get("阴性造诣");
-				NPCYangAttainmentField.tooltips = TFMgr.Get("阳性造诣");
-				NPCTotalAttainmentField.tooltips = $"{TFMgr.Get("学习完所有选定手册后的最终成果")}\n\n{TFMgr.Get("降低参悟值的功法不计入计算")}";
-				NPCAttainmentChangeField.tooltips = TFMgr.Get("习得秘籍后的阴阳平衡：黑色代表阴性增强，白色代表阳性增强。");
-				
-				mainPane.AddChild(NPCYinAttainmentField);
-				mainPane.AddChild(NPCYangAttainmentField);
-				mainPane.AddChild(NPCTotalAttainmentField);
-				mainPane.AddChild(NPCAttainmentChangeField);
+
+				npcYinAttainmentField.color = Color.black;
+				npcYangAttainmentField.color = Color.white;
+				npcTotalAttainmentField.color = new Color32(255, 191, 0, 255);
+				npcTotalAttainmentField.fontsize += 2;
+				npcTotalAttainmentField.height = 22;
+
+				npcYinAttainmentField.tooltips = TFMgr.Get("阴性造诣");
+				npcYangAttainmentField.tooltips = TFMgr.Get("阳性造诣");
+				npcTotalAttainmentField.tooltips = $"{TFMgr.Get("学习完所有选定手册后的最终成果")}\n\n{TFMgr.Get("降低参悟值的功法不计入计算")}";
+				npcAttainmentChangeField.tooltips = TFMgr.Get("习得秘籍后的阴阳平衡：黑色代表阴性增强，白色代表阳性增强。");
+
+				mainPane.AddChild(npcYinAttainmentField);
+				mainPane.AddChild(npcYangAttainmentField);
+				mainPane.AddChild(npcTotalAttainmentField);
+				mainPane.AddChild(npcAttainmentChangeField);
 			}
-			
+
 			mainPane.m_clearall.onClick.Add(ResetFields);
-			
+
 			ResetFields();
 		}
 
@@ -148,14 +157,14 @@ namespace YaogUI
 			}
 
 			difference = totalYin - totalYang;
-			
+
 			totalAttainmentField.text = totalAttainment.ToString();
 			yinAttainmentField.text = totalYin.ToString();
 			yangAttainmentField.text = totalYang.ToString();
 
 			if (difference == 0)
 			{
-				NPCAttainmentChangeField.text = "-";
+				npcAttainmentChangeField.text = "-";
 			}
 			else
 			{
@@ -166,40 +175,41 @@ namespace YaogUI
 			UpdateNPCAttainmentFields(totalAttainment, totalYin, totalYang);
 		}
 
-		public static void UpdateNPCAttainmentFields(int additionalAttainment = 0, int additionalYin = 0, int additionalYang = 0)
+		public static void UpdateNPCAttainmentFields(int additionalAttainment = 0, int additionalYin = 0,
+			int additionalYang = 0)
 		{
 			var npc = Traverse.Create(Wnd_CangJingGeWindow.Instance).Field<Npc>("_npc").Value;
-			
+
 			if (npc == null) return; //Not sure if this is even possible
-			
+
 			var startingAttainment = npc.PropertyMgr.Practice.GetDaoHang(true);
 			var npcStartingYang = npc.PropertyMgr.Practice.GetYangDaoHang(true);
 			var npcStartingYin = npc.PropertyMgr.Practice.GetYinDaoHang(true);
-			
-			
+
+
 			var npcFinalAttainment = startingAttainment + Math.Abs(additionalYin + additionalYang);
 			var npcFinalYin = npcStartingYin + additionalYin;
 			var npcFinalYang = npcStartingYang + additionalYang;
-			
+
 			var npcBalance = npcFinalYin - npcFinalYang;
-			
-			NPCTotalAttainmentField.text = npcFinalAttainment.ToString();
-			NPCYinAttainmentField.text = npc.PropertyMgr.Practice.Gong.YinYang > 0
+
+			npcTotalAttainmentField.text = npcFinalAttainment.ToString();
+			npcYinAttainmentField.text = npc.PropertyMgr.Practice.Gong.YinYang > 0
 				? npcFinalYin.ToString()
 				: "-";
-			NPCYangAttainmentField.text = npc.PropertyMgr.Practice.Gong.YinYang > 0
+			npcYangAttainmentField.text = npc.PropertyMgr.Practice.Gong.YinYang > 0
 				? npcFinalYang.ToString()
 				: "-";
-			
+
 			if (npcBalance == 0)
 			{
-				NPCAttainmentChangeField.color = Color.gray;
-				NPCAttainmentChangeField.text = "☯️";
+				npcAttainmentChangeField.color = Color.gray;
+				npcAttainmentChangeField.text = "☯️";
 			}
 			else
 			{
-				NPCAttainmentChangeField.text = $"+{Math.Abs(npcBalance)}";
-				NPCAttainmentChangeField.color = npcBalance > 0 ? Color.black : Color.white;
+				npcAttainmentChangeField.text = $"+{Math.Abs(npcBalance)}";
+				npcAttainmentChangeField.color = npcBalance > 0 ? Color.black : Color.white;
 			}
 		}
 

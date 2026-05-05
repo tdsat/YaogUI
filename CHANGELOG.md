@@ -1,3 +1,6 @@
+## v0.6.1 (05/05/2026)
+- (Manual Pavilion) Fix issue where Pavilion would be unusable after entering a map
+
 ## v0.6 (05/05/2026)
 - (School Gift) Added search to the school gift window
 - (Trade Window) Auto-balance now takes into account price scaling based on relations
