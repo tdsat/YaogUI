@@ -120,30 +120,29 @@ namespace YaogUI
 			{
 				var UI = __instance.UIInfo;
 
-				var balanceRight = AutoBalance.balanceRightBtn ??
-				                   (GButton)UIPackage.CreateObjectFromURL("ui://ncbwb41mv9j6ah");
-				balanceRight.name = "YaogUI.BalanceRight";
-				balanceRight.text = TFMgr.Get("平衡");
-				balanceRight.tooltips = TFMgr.Get("点击使用灵石平衡交易。");
-				balanceRight.x = UI.width - 250;
-				balanceRight.y = 65;
-				AutoBalance.balanceRightBtn = balanceRight;
+				AutoBalance.balanceRightBtn = (GButton)UIPackage.CreateObjectFromURL("ui://ncbwb41mv9j6ah");
+				var balanceRightBtn = AutoBalance.balanceRightBtn;
+				balanceRightBtn.name = "YaogUI.BalanceRight";
+				balanceRightBtn.text = TFMgr.Get("平衡");
+				balanceRightBtn.tooltips = TFMgr.Get("点击使用灵石平衡交易。");
+				balanceRightBtn.x = UI.width - 250;
+				balanceRightBtn.y = 65;
 
 				var balanceLeft = AutoBalance.balanceLeftBtn ??
 				                  (GButton)UIPackage.CreateObjectFromURL("ui://ncbwb41mv9j6ah");
 				balanceLeft.name = "YaogUI.BalanceLeft";
-				balanceLeft.text = balanceRight.text;
-				balanceLeft.tooltips = balanceRight.tooltips;
+				balanceLeft.text = balanceRightBtn.text;
+				balanceLeft.tooltips = balanceRightBtn.tooltips;
 				balanceLeft.x = 180;
 				balanceLeft.y = 65;
 				AutoBalance.balanceLeftBtn = balanceLeft;
 
 				UI.RemoveChild(balanceLeft);
-				UI.RemoveChild(balanceRight);
+				UI.RemoveChild(balanceRightBtn);
 
-				balanceRight.onClick.Add(AutoBalance.BalanceTradeNodes);
+				balanceRightBtn.onClick.Add(AutoBalance.BalanceTradeNodes);
 				balanceLeft.onClick.Add(AutoBalance.BalanceTradeNodes);
-				UI.AddChild(balanceRight);
+				UI.AddChild(balanceRightBtn);
 				UI.AddChild(balanceLeft);
 			}
 			catch (Exception e)
