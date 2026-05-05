@@ -128,14 +128,14 @@ namespace YaogUI
 				balanceRightBtn.x = UI.width - 250;
 				balanceRightBtn.y = 65;
 
-				var balanceLeft = AutoBalance.balanceLeftBtn ??
-				                  (GButton)UIPackage.CreateObjectFromURL("ui://ncbwb41mv9j6ah");
+				AutoBalance.balanceLeftBtn = (GButton)UIPackage.CreateObjectFromURL("ui://ncbwb41mv9j6ah");
+				var balanceLeft = AutoBalance.balanceLeftBtn;
+				
 				balanceLeft.name = "YaogUI.BalanceLeft";
 				balanceLeft.text = balanceRightBtn.text;
 				balanceLeft.tooltips = balanceRightBtn.tooltips;
 				balanceLeft.x = 180;
 				balanceLeft.y = 65;
-				AutoBalance.balanceLeftBtn = balanceLeft;
 
 				UI.RemoveChild(balanceLeft);
 				UI.RemoveChild(balanceRightBtn);
