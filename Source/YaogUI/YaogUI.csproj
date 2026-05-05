@@ -60,6 +60,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ManualPavilion.cs" />
     <Compile Include="MiscEdits.cs" />
     <Compile Include="SectPower.cs" />
     <Compile Include="Npc.cs" />

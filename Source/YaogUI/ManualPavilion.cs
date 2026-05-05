@@ -27,6 +27,7 @@ namespace YaogUI
 		private static UI_NpcInfoLable GetLabelField(string name)
 		{
 			var field = UI_NpcInfoLable.CreateInstance();
+			field.text = "-";
 			field.name = name;
 			field.height = fieldHeight;
 			field.width = fieldWidth;
@@ -42,7 +43,7 @@ namespace YaogUI
 			// Cool magic numbers
 			bgImage.width = 246;
 			bgImage.height = 100;
-			bgImage.x = mainPane.m_n5.x - 20;
+			bgImage.x = 780;
 			bgImage.y = mainPane.m_n5.y + mainPane.m_n5.height;
 
 			yinAttainmentField.color = Color.black;
@@ -83,7 +84,7 @@ namespace YaogUI
 				
 				NPCYinAttainmentField.tooltips = TFMgr.Get("阴性造诣");
 				NPCYangAttainmentField.tooltips = TFMgr.Get("阳性造诣");
-				NPCYinAttainmentField.tooltips = $"{TFMgr.Get("所选秘籍的总参悟")}\n\n{TFMgr.Get("降低参悟值的功法不计入计算")}";
+				NPCTotalAttainmentField.tooltips = $"{TFMgr.Get("学习完所有选定手册后的最终成果")}\n\n{TFMgr.Get("降低参悟值的功法不计入计算")}";
 				NPCAttainmentChangeField.tooltips = TFMgr.Get("习得秘籍后的阴阳平衡：黑色代表阴性增强，白色代表阳性增强。");
 				
 				mainPane.AddChild(NPCYinAttainmentField);
@@ -192,7 +193,7 @@ namespace YaogUI
 			
 			if (npcBalance == 0)
 			{
-				NPCAttainmentChangeField.m_n82.color = Color.white;
+				NPCAttainmentChangeField.color = Color.gray;
 				NPCAttainmentChangeField.text = "☯️";
 			}
 			else
