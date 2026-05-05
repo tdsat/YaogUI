@@ -49,7 +49,7 @@ namespace YaogUI
 			yinAttainmentField.color = Color.black;
 			yangAttainmentField.color = Color.white;
 			totalAttainmentField.color = new Color32(255, 191, 0, 255);
-			totalAttainmentField.fontsize += 3;
+			totalAttainmentField.fontsize += 2;
 			totalAttainmentField.height = 22;
 
 			yinAttainmentField.tooltips = TFMgr.Get("阴性造诣");
@@ -79,7 +79,7 @@ namespace YaogUI
 				NPCYinAttainmentField.color = Color.black;
 				NPCYangAttainmentField.color = Color.white;
 				NPCTotalAttainmentField.color = new Color32(255, 191, 0, 255);
-				NPCTotalAttainmentField.fontsize += 3;
+				NPCTotalAttainmentField.fontsize += 2;
 				NPCTotalAttainmentField.height = 22;
 				
 				NPCYinAttainmentField.tooltips = TFMgr.Get("阴性造诣");
