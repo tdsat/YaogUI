@@ -11,5 +11,5 @@ Key	Value
 阴性造诣	Yin Attainment
 阳性造诣	Yang Attainment
 所选秘籍的总参悟	Total Attainment from selected manuals
-阴阳变化：白色代表阴气较重，黑色代表阳气较重	Change in Ying/Yang - White means more Yin, black means more Yang
+习得秘籍后的阴阳平衡：黑色代表阴性增强，白色代表阳性增强。	Yin/Yang balance after learning manuals - Black means more Yin, white means more Yang	Yin/Yang balance after learning manuals - Black means more Yin, white means more Yang
 降低参悟值的功法不计入计算	Manuals that reduce Attainment are not considered in the calculations
