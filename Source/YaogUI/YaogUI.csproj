@@ -60,9 +60,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ManualPavilion.cs" />
     <Compile Include="MiscEdits.cs" />
     <Compile Include="SectPower.cs" />
     <Compile Include="Npc.cs" />
+    <Compile Include="ShoolGiftSearch.cs" />
     <Compile Include="TradeWindowAutoBalance.cs" />
     <Compile Include="TradeWindowSearch.cs" />
     <Compile Include="StorageArea.cs" />

@@ -20,20 +20,31 @@ namespace YaogUI
 
 		public static void CleanUp()
 		{
-			sellSearchInput.onKeyDown.Clear();
-			buySearchInput.onKeyDown.Clear();
-			categoryList.m_hideWorthlessCheckbox.RemoveEventListeners();
+			if (sellSearchInput != null)
+			{
+				//Clear these events because there's weird case where they still trigger even if the input is not visible
+				sellSearchInput.onKeyDown.Clear();
+				sellSearchInput.visible = false;
+			}
 
-			categoryList.visible = false;
-			sellSearchInput.visible = false;
-			buySearchInput.visible = false;
+			if (buySearchInput != null)
+			{
+				buySearchInput.onKeyDown.Clear();
+				buySearchInput.visible = false;
+			}
+
+			if (categoryList != null)
+			{
+				categoryList.visible = false;
+			}
+
 			// Not sure if it's a good idea doing this here. Will keep an eye...
 			if (AutoBalance.balanceLeftBtn != null)
 				AutoBalance.balanceLeftBtn.visible = false;
 			if (AutoBalance.balanceRightBtn != null)
 				AutoBalance.balanceRightBtn.visible = false;
 		}
-		
+
 		public static void FilterSellList()
 		{
 			var tradeWindow = Wnd_SchoolTrade.Instance;
@@ -63,8 +74,7 @@ namespace YaogUI
 			searchField.text = "";
 			FilterSellList();
 		}
-		
-		
+
 		public static void FilterBuyList()
 		{
 			var tradeWindow = Wnd_SchoolTrade.Instance;
@@ -89,38 +99,34 @@ namespace YaogUI
 	[HarmonyPatch(typeof(Wnd_SchoolTrade), "OnShowUpdate")]
 	public static class AddQuickCategoryListToTradeWindow
 	{
-		public static void Postfix(Wnd_SchoolTrade __instance)
+		[HarmonyPostfix]
+		public static void UpdateCategoryListItems(Wnd_SchoolTrade __instance)
 		{
 			try
 			{
-				TradeWindowSearch.sellSearchInput.onKeyDown.Add(TradeWindowSearch.FilterSellList);
-				UI_TradeCategoryList categoryPanel;
-
-				if ((categoryPanel = TradeWindowSearch.categoryList) == null)
-				{
-					TradeWindowSearch.categoryList = UI_TradeCategoryList.CreateInstance();
-					categoryPanel = TradeWindowSearch.categoryList;
-					categoryPanel.name = "YaogUI.CategoryPanel";
-					__instance.UIInfo.AddChild(categoryPanel);
-				}
+				var categoryPanel = TradeWindowSearch.categoryList;
 
 				TradeWindowSearch.sellSearchInput.visible = true;
 				TradeWindowSearch.buySearchInput.visible = true;
+				// Re-attach keydown events
+				TradeWindowSearch.sellSearchInput.onKeyDown.Add(TradeWindowSearch.FilterSellList);
+				TradeWindowSearch.buySearchInput.onKeyDown.Add(TradeWindowSearch.FilterBuyList);
+				
 				categoryPanel.visible = true;
 				var sellItemList = __instance.UIInfo.m_rightitem;
 
-				var categoryList = (GList)categoryPanel.GetChild("list");
+				var categoryList = categoryPanel.m_list;
 				var items = sellItemList.GetChildren();
 				categoryList.RemoveChildrenToPool();
-
-				// // Add link to spirit stone
+				// Add link to spirit stone
 				var btn = (GButton)categoryList.AddItemFromPool();
 				btn.title = TFMgr.Get("灵石");
 				btn.height = 30;
-				btn.onClick.Set(() => sellItemList.ScrollToView(0, true, true));
-				foreach (UI_TradeItem item in items)
+				btn.onClick.Add(() => sellItemList.ScrollToView(0, true, true));
+				foreach (var o in items)
 				{
-					if (item.name != "ItemType") continue;
+					var item = (UI_TradeItem)o;
+					if (item == null || item.name != "ItemType") continue;
 					var index = sellItemList.GetChildIndex(item);
 					btn = (GButton)categoryList.AddItemFromPool();
 					btn.title = item.m_typename.text;
@@ -128,8 +134,6 @@ namespace YaogUI
 					btn.onClick.Set(() => sellItemList.ScrollToView(index, true, true));
 				}
 
-				categoryPanel.x = sellItemList.x + sellItemList.width;
-				categoryPanel.y = sellItemList.y - 60;
 				categoryPanel.height = categoryList.numItems * 30 + 65;
 				categoryPanel.m_hideWorthlessCheckbox.onClick.Add(e =>
 				{
@@ -185,70 +189,77 @@ namespace YaogUI
 	}
 
 	[HarmonyPatch(typeof(Wnd_SchoolTrade), "OnInit")]
-	public static class AddTradeWindowSellItemSearch
+	public static class AddSearchFields
 	{
+		[HarmonyPostfix]
 		public static void Postfix(Wnd_SchoolTrade __instance)
 		{
 			try
 			{
-				var tradeWindow = __instance;
-				TradeWindowSearch.sellSearchInput = UI_ClearableInput.CreateInstance();
-				TradeWindowSearch.sellSearchInput.name = "YaogUI.SellSearchInput";
-				var searchInput = TradeWindowSearch.sellSearchInput;
-				var clearSearchBtn = searchInput.m_clearButton;
-
-				var list = tradeWindow.UIInfo.m_rightitem;
-				list.foldInvisibleItems = true;
-
-				searchInput.x = list.x - 10;
-				searchInput.y = list.y - 40;
-				searchInput.width = list.width;
-
-				searchInput.onKeyDown.Add(TradeWindowSearch.FilterSellList);
-				clearSearchBtn.onClick.Add(TradeWindowSearch.ClearSellSearch);
-				// Search again when switching schools since items have changed
-				tradeWindow.UIInfo.m_n51.onClickItem.Add(TradeWindowSearch.ClearSellSearch);
-
-				tradeWindow.UIInfo.AddChild(searchInput);
+				AddTradeWindowSellItemSearch(__instance);
+				AddTradeWindowBuyItemSearch(__instance);
+				AddCategoryPanel(__instance);
 			}
 			catch (Exception e)
 			{
 				Main.Debug(e.ToString());
 			}
 		}
-	}
 
-	[HarmonyPatch(typeof(Wnd_SchoolTrade), "OnInit")]
-	public static class AddTradeWindowBuyItemSearch
-	{
-		public static void Postfix(Wnd_SchoolTrade __instance)
+		public static void AddCategoryPanel(Wnd_SchoolTrade tradeWindow)
 		{
-			try
-			{
-				var tradeWindow = __instance;
-				TradeWindowSearch.buySearchInput = UI_ClearableInput.CreateInstance();
-				TradeWindowSearch.buySearchInput.name = "YaogUI.BuySearchInput";
-				var searchInput = TradeWindowSearch.buySearchInput;
-				var clearSearchBtn = searchInput.m_clearButton;
+			TradeWindowSearch.categoryList = UI_TradeCategoryList.CreateInstance();
+			TradeWindowSearch.categoryList.name = "YaogUI.CategoryPanel";
+			TradeWindowSearch.categoryList.visible = true;
+			tradeWindow.UIInfo.AddChild(TradeWindowSearch.categoryList);
+			// Put it next to the sell list
+			TradeWindowSearch.categoryList.x = tradeWindow.UIInfo.m_rightitem.x + tradeWindow.UIInfo.m_rightitem.width;
+			TradeWindowSearch.categoryList.y = tradeWindow.UIInfo.m_rightitem.y - 60;
+		}
 
-				var list = tradeWindow.UIInfo.m_leftitem;
-				list.foldInvisibleItems = true;
 
-				searchInput.x = list.x - 10;
-				searchInput.y = list.y - 40;
-				searchInput.width = list.width;
+		public static void AddTradeWindowSellItemSearch(Wnd_SchoolTrade tradeWindow)
+		{
+			TradeWindowSearch.sellSearchInput = UI_ClearableInput.CreateInstance();
+			TradeWindowSearch.sellSearchInput.name = "YaogUI.SellSearchInput";
+			var searchInput = TradeWindowSearch.sellSearchInput;
+			var clearSearchBtn = searchInput.m_clearButton;
 
-				searchInput.onKeyDown.Add(TradeWindowSearch.FilterBuyList);
-				clearSearchBtn.onClick.Add(TradeWindowSearch.ClearBuySearch);
-				// Search again when switching schools since items have changed
-				tradeWindow.UIInfo.m_n51.onClickItem.Add(TradeWindowSearch.FilterBuyList);
+			var list = tradeWindow.UIInfo.m_rightitem;
+			list.foldInvisibleItems = true;
 
-				tradeWindow.UIInfo.AddChild(searchInput);
-			}
-			catch (Exception e)
-			{
-				Main.Debug(e.ToString());
-			}
+			searchInput.x = list.x - 10;
+			searchInput.y = list.y - 40;
+			searchInput.width = list.width;
+
+			searchInput.onKeyDown.Add(TradeWindowSearch.FilterSellList);
+			clearSearchBtn.onClick.Add(TradeWindowSearch.ClearSellSearch);
+			// Search again when switching schools since items have changed
+			tradeWindow.UIInfo.m_n51.onClickItem.Add(TradeWindowSearch.ClearSellSearch);
+
+			tradeWindow.UIInfo.AddChild(searchInput);
+		}
+
+		public static void AddTradeWindowBuyItemSearch(Wnd_SchoolTrade tradeWindow)
+		{
+			TradeWindowSearch.buySearchInput = UI_ClearableInput.CreateInstance();
+			TradeWindowSearch.buySearchInput.name = "YaogUI.BuySearchInput";
+			var searchInput = TradeWindowSearch.buySearchInput;
+			var clearSearchBtn = searchInput.m_clearButton;
+
+			var list = tradeWindow.UIInfo.m_leftitem;
+			list.foldInvisibleItems = true;
+
+			searchInput.x = list.x - 10;
+			searchInput.y = list.y - 40;
+			searchInput.width = list.width;
+
+			searchInput.onKeyDown.Add(TradeWindowSearch.FilterBuyList);
+			clearSearchBtn.onClick.Add(TradeWindowSearch.ClearBuySearch);
+			// Search again when switching schools since items have changed
+			tradeWindow.UIInfo.m_n51.onClickItem.Add(TradeWindowSearch.FilterBuyList);
+
+			tradeWindow.UIInfo.AddChild(searchInput);
 		}
 	}
 

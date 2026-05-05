@@ -1,7 +1,9 @@
 ﻿using HarmonyLib;
 using System;
+using System.Collections.Generic;
 using FairyGUI;
 using XiaWorld;
+using XiaWorld.UI.InGame;
 
 namespace YaogUI
 {
@@ -14,10 +16,18 @@ namespace YaogUI
 			{
 				var materialList = __instance.UIInfo.m_MainList.m_StuffList;
 				var listBg = __instance.UIInfo.m_MainList.m_n9;
-				materialList.x = listBg.x + 5;
 				materialList.layout = ListLayoutType.FlowHorizontal;
 				
 				ThingDef def3 = ThingMgr.Instance.GetDef(g_emThingType.Building, data.ObjName);
+				var thingDefList = ThingMgr.Instance.GetBuildingAllStuff(def3.Name);
+				if (thingDefList == null || thingDefList.Count <= 0)
+				{
+					listBg.visible = false;
+					return;
+				}
+
+				// This is some shit code but I can't be bothered tbh...
+				listBg.visible = true;
 				if (def3.Building.BeMade.CostItems != null && def3.Building.BeMade.CostItems.Count > 0)
 				{ // Dual-material thing
 					listBg.width = 220;
@@ -30,6 +40,7 @@ namespace YaogUI
 					materialList.width = 130;
 					materialList.columnGap = 0;
 				}
+				materialList.x = listBg.x + 5;
 			}
 			catch (Exception e)
 			{
@@ -49,6 +60,42 @@ namespace YaogUI
 			if (__instance.UIInfo.m_n25.numItems == 1)
 			{
 				__instance.UIInfo.m_n25.GetChildAt(0).onClick.Call();
+			}
+		}
+	}
+
+	[HarmonyPatch]
+	public static class ProduceShortcuts
+	
+	{
+		[HarmonyPatch(typeof(Wnd_BuildingProduce), "__clickSelectItem")]
+		[HarmonyPrefix]
+		public static bool HandleShortcuts(Wnd_BuildingProduce __instance, EventContext context)
+		{
+			int data5 = (int) ((GObject) context.data).data5;
+			BuildingThing building = Traverse.Create(__instance).Field("Building").GetValue<BuildingThing>();
+			var produce = building.ProduceMachine.AddTask(data5);
+			ReplayMgr.Instance.RecordCMD((ReplayData) new ReplayCommandBuildingProduce(building.ID, data5, false));
+			if (context.inputEvent.shift)
+			{
+				produce.Count = 10;
+			} else if (context.inputEvent.ctrl)
+			{
+				produce.Count = 50;
+			}
+			return false;
+		}
+
+		[HarmonyPatch(typeof(Wnd_BuildingProduce), "UpdateSelectList")]
+		[HarmonyPostfix]
+		public static void UpdateTooltips(Wnd_BuildingProduce __instance)
+		{
+			List<BuildingProduce.BuildingProduceData> lisProduceMenu = Traverse.Create(__instance).Field("Building")
+				.GetValue<BuildingThing>().ProduceMachine.m_lisProduceMenu;
+			for (int index = 0; index < lisProduceMenu.Count; ++index)
+			{
+				var button = __instance.UIInfo.m_SelectList.GetChildAt(index);
+				button.tooltips += TFMgr.Get("[color=#9e6404]\n\nShift+单击：x10\nCtrl+单击：x50[/color]");
 			}
 		}
 	}

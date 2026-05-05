@@ -18,14 +18,6 @@ Releases can be downloaded from [NexusMods](https://www.nexusmods.com/amazingcul
   - This works by adding/removing Spirit Stones to the trade so that the values match
   - You can select which side of the trade you want to balance
 
-##### How to add custom presets
-You can add custom presets by creating a `custom_presets.xml` and adding your own. You can use the `storage_presets_sample.xml`
-as a reference since it contains all available options. 
-
-The simplest way to add custom presets is to copy the `default_presets.xml` and rename it to `custom_presets.xml`
-
-> Please note that custom presets will overwrite default ones if they have the same name
-
 ### Talisman Drawing Window
 - Ability to search when crafting item
 - Talisman list also has a new look
@@ -40,7 +32,34 @@ The simplest way to add custom presets is to copy the `default_presets.xml` and 
 - When a vessel dies, it name changes to '[Owner]'s Vessel' to make it easier to identify who owns it
 - 'X : Hurt' and 'X : injury deteriorating' messages get cleaned if the affected pawn get healed
 - Doubled the material selection columns when building
-- During adventures, when the NPC selection dialog appears, if there's only one NPC in the map they are auto-selected
+- During adventures, when the NPC selection window appears, if there's only one NPC in the map they are auto-selected
+  - If you want to get rid of this interaction entirely, you can use [YodaDoge's ACS Tweaks](https://github.com/YodaDoge/ACSMods/) ([Steam](https://steamcommunity.com/sharedfiles/filedetails/?id=3693376357))
+- Added search to the School Gift window
+- Holding Shift/Ctrl when queueing a production item changes the amount to 10/50 respectively
+- (Manual Pavilion) Total attainment (Ying/Yang) of selected manuals shown
+  - Also shows the totals for the selected NPC after studying the selected manuals
+
+#### How to add custom presets
+You can add custom presets by creating a `custom_presets.xml` and adding your own. You can use the `storage_presets_sample.xml`
+as a reference since it contains all available options.
+
+The simplest way to add custom presets is to copy the `default_presets.xml` and rename it to `custom_presets.xml`
+
+> Please note that custom presets will overwrite default ones if they have the same name
+
+
+# Known Issues
+### Trade isn’t accepted after auto-balancing
+Sometimes the trade might not be accepted after clicking auto-balance on the seller side,
+even if the trade values appear to be the same.
+That's because of a rounding issue in the underlying calculations.
+
+The solution is to add one extra spirit stone to the trade
+
+#### Some of the new UI elements disappear
+Under certain circumstances, some of the new UI elements (Search fields, buttons etc)
+might disappear. This is probably because there was an error and the game can't render them property.
+Reloading should fix all issues
 
 # Development
 
@@ -62,7 +81,7 @@ This is a non-exhaustive list that I plan to work on. I can't give any promises 
  - [ ] Ability to save/favorite talismans
 	-  Need to figure out how saves work
  - [X] Search in trade window
- - [ ] Improve the inner disciples spell list
+ - [ ] ~~Improve the inner disciples spell list~~ Done in YodaDoges Tweaks
  - [ ] Make features optional through the UI
  - [ ] Add more options to the sidebar message configuration (e.g. "Ignore 'There is a fire' messages" etc)
 
