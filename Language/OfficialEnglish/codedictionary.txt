@@ -7,7 +7,6 @@ Key	Value
 按住 Ctrl 键并单击以取消选择其他选项	Ctrl+Click to deselect the other options
 未找到灵石	No spirit stones found
 点击使用灵石平衡交易。	Click to balance the trade using Spirit Stones
-[color=#9e6404]\n\nShift+单击：x10\nCtrl+单击：x50[/color]	[color=#9e6404]\n\nShift+Click: x10\nCtrl+Click: x50[/color]
 阴性造诣	Yin Attainment
 阳性造诣	Yang Attainment
 所选秘籍的总参悟	Total Attainment from selected manuals

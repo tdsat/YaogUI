@@ -69,21 +69,24 @@ namespace YaogUI
 	
 	{
 		[HarmonyPatch(typeof(Wnd_BuildingProduce), "__clickSelectItem")]
-		[HarmonyPrefix]
-		public static bool HandleShortcuts(Wnd_BuildingProduce __instance, EventContext context)
+		[HarmonyPostfix]
+		public static void HandleShortcuts(Wnd_BuildingProduce __instance, EventContext context)
 		{
-			int data5 = (int) ((GObject) context.data).data5;
 			BuildingThing building = Traverse.Create(__instance).Field("Building").GetValue<BuildingThing>();
-			var produce = building.ProduceMachine.AddTask(data5);
-			ReplayMgr.Instance.RecordCMD((ReplayData) new ReplayCommandBuildingProduce(building.ID, data5, false));
+		
+			var count = 1;
 			if (context.inputEvent.shift)
 			{
-				produce.Count = 10;
+				count = 10;
 			} else if (context.inputEvent.ctrl)
 			{
-				produce.Count = 50;
+				count = 50;
 			}
-			return false;
+		
+			if (building.ProduceMachine == null) return;
+			var index = building.ProduceMachine.m_lisProduceList?.Count - 1;
+			
+			building.ProduceMachine.LoopTask(index ?? 0, count);
 		}
 
 		[HarmonyPatch(typeof(Wnd_BuildingProduce), "UpdateSelectList")]
@@ -95,7 +98,7 @@ namespace YaogUI
 			for (int index = 0; index < lisProduceMenu.Count; ++index)
 			{
 				var button = __instance.UIInfo.m_SelectList.GetChildAt(index);
-				button.tooltips += TFMgr.Get("[color=#9e6404]\n\nShift+单击：x10\nCtrl+单击：x50[/color]");
+				button.tooltips += "[color=#9e6404]\n\nShift：x10\nCtrl：x50[/color]";
 			}
 		}
 	}

@@ -1,3 +1,7 @@
+## v0.6.2 (06/05/2026)
+- (Misc) Fix loop shortcut logic
+- (Trade Window) Fix possible issue where the trade window would become unusable until reload
+
 ## v0.6.1 (05/05/2026)
 - (Manual Pavilion) Fix issue where Pavilion would be unusable after entering a map
 
