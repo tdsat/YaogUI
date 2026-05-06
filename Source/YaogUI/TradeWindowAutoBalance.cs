@@ -59,15 +59,14 @@ namespace YaogUI
 			var offerAmount = sellValue?.Value ?? 0;
 			var askingPrice = buyValue?.Value ?? 0;
 
-			var offerValue = offerAmount * scale;
-			var finalOffer = Mathf.CeilToInt(offerValue);
-
-			int difference = finalOffer - askingPrice;
-			var toTransfer = Mathf.CeilToInt(askingPrice / scale - offerAmount);
+			var offerValue = Mathf.CeilToInt(offerAmount * scale);
+			int difference = offerValue - askingPrice;
 
 			if (difference == 0) return;
 			if (saleList != null)
 			{
+				var toTransfer = Mathf.CeilToInt(askingPrice / scale - offerAmount);
+				
 				Traverse.Create(saleList).Method("ToSelect", new[]
 							{ typeof(TreeNode), typeof(TreeView), typeof(int) },
 						new object[] { spiritStoneNode, tradeSelect, toTransfer })
@@ -77,9 +76,10 @@ namespace YaogUI
 
 			if (buyList != null)
 			{
+				// Main.Debug($"Asking price {askingPrice} - Offer amount {offerAmount} - Difference {difference} - ToTransfer {difference}");
 				Traverse.Create(buyList).Method("ToSelect", new[]
 							{ typeof(TreeNode), typeof(TreeView), typeof(int) },
-						new object[] { spiritStoneNode, tradeSelect, toTransfer * -1 })
+						new object[] { spiritStoneNode, tradeSelect, difference })
 					.GetValue();
 				buyList.ValueChange();
 			}
