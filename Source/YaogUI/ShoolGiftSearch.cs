@@ -35,6 +35,7 @@ namespace YaogUI
 			[HarmonyPostfix]
 			public static void Postfix(Wnd_SchoolGiveGift __instance)
 			{
+				giftInputSearch = UI_ClearableInput.CreateInstance();
 				giftInputSearch.name = "YaogUI.GiftSearchInput";
 				var clearSearchBtn = giftInputSearch.m_clearButton;
 
