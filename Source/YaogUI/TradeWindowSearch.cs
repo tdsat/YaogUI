@@ -292,27 +292,14 @@ namespace YaogUI
 		}
 	}
 
-	// Needed to get the values of priceDef. Can't simply Traverse because they seem to be null
-	// when we need/use them
-	[HarmonyPatch(typeof(Wnd_SchoolTrade), "ShowSchool")]
-	public static class StorePriceDefForSchoolTrade
+	[HarmonyPatch]
+	public static class StoreRequiredVariables
 	{
-		public static void Prefix(int school)
-		{
-			if (TradeWnd.HasTradeArea())
-			{
-				SchoolTradeDef schoolDef = TradeMgr.Instance.GetSchoolTradeDef(school);
-				TradeWindowSearch.priceDef = TradeMgr.Instance.GetPriceDef(schoolDef.Price);
-			}
-		}
-	}
-
-	// Needed to get the values of priceDef. Can't simply Traverse because they seem to be null
-	// when we need/use them
-	[HarmonyPatch(typeof(Wnd_SchoolTrade), "ShowWalkTrader")]
-	public static class StorePriceDefForTrader
-	{
-		public static void Prefix(string walker, Npc npc = null)
+		// Needed to get the values of priceDef. Can't simply Traverse because they seem to be null
+		// when we need/use them
+		[HarmonyPatch(typeof(Wnd_SchoolTrade), "ShowWalkTrader")]
+		[HarmonyPrefix]
+		public static void StorePriceDefForTrader(string walker, Npc npc = null)
 		{
 			if (TradeWnd.HasTradeArea())
 			{
@@ -320,13 +307,22 @@ namespace YaogUI
 				TradeWindowSearch.priceDef = TradeMgr.Instance.GetPriceDef(tradeDef.Price);
 			}
 		}
-	}
 
-	// Needed so that components get hidden when user accepts trade. There might be a better way to achieve this
-	[HarmonyPatch(typeof(Wnd_SchoolTrade), "__selectyes")]
-	public static class HideTradeComponents
-	{
-		public static void Postfix(Wnd_SchoolTrade __instance)
+		[HarmonyPatch(methodName: "ShowSchool")]
+		[HarmonyPrefix]
+		public static void StorePriceDefForSchoolTrade(int school)
+		{
+			if (TradeWnd.HasTradeArea())
+			{
+				SchoolTradeDef schoolDef = TradeMgr.Instance.GetSchoolTradeDef(school);
+				TradeWindowSearch.priceDef = TradeMgr.Instance.GetPriceDef(schoolDef.Price);
+			}
+		}
+
+		// Needed so that components get hidden when user accepts trade. There might be a better way to achieve this
+		[HarmonyPatch(typeof(Wnd_SchoolTrade), "__selectyes")]
+		[HarmonyPostfix]
+		public static void HideTradeComponents(Wnd_SchoolTrade __instance)
 		{
 			if (__instance.UIInfo.m_state.selectedIndex == 1)
 			{
