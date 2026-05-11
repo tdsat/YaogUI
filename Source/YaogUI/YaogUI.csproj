@@ -65,6 +65,7 @@
     <Compile Include="SectPower.cs" />
     <Compile Include="Npc.cs" />
     <Compile Include="ShoolGiftSearch.cs" />
+    <Compile Include="SubSpiritCrafting.cs" />
     <Compile Include="TradeWindowAutoBalance.cs" />
     <Compile Include="TradeWindowSearch.cs" />
     <Compile Include="StorageArea.cs" />
