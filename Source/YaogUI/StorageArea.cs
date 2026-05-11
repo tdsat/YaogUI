@@ -22,6 +22,7 @@ namespace YaogUI
         public bool onlyFSItem;
         public bool CanSale;
         public bool onlyBigFish;
+        public string description = "";
 
         public static bool GetTruthyValue([CanBeNull] string value)
         {
@@ -66,11 +67,11 @@ namespace YaogUI
             }
 
             // Quality
-            area.IncludeItemQ[0] = Qualities.Contains("Poor");
-            area.IncludeItemQ[1] = Qualities.Contains("Common");
-            area.IncludeItemQ[2] = Qualities.Contains("Excellent");
-            area.IncludeItemQ[3] = Qualities.Contains("Exquisite");
-            area.IncludeItemQ[4] = Qualities.Contains("None");
+            area.IncludeItemQ[0] = Qualities.Contains("None");
+            area.IncludeItemQ[1] = Qualities.Contains("Poor");
+            area.IncludeItemQ[2] = Qualities.Contains("Common");
+            area.IncludeItemQ[3] = Qualities.Contains("Excellent");
+            area.IncludeItemQ[4] = Qualities.Contains("Exquisite");
             // Tier
             // Ok so tiers are a bit weird. Min tier's actual value is X-1 from what you see in the UI
             // So a UI Tier on is actually 0. So when we set a min tier of 6, we need to subtract 1 from
@@ -131,7 +132,8 @@ namespace YaogUI
                     Priority = presetNode.Attributes["priority"]?.Value,
                     CanSale = StoragePreset.GetTruthyValue(presetNode.Attributes["CanSale"]?.Value),
                     onlyFSItem = StoragePreset.GetTruthyValue(presetNode.Attributes["onlyFSItem"]?.Value),
-                    onlyBigFish = StoragePreset.GetTruthyValue(presetNode.Attributes["onlyBigFish"]?.Value)
+                    onlyBigFish = StoragePreset.GetTruthyValue(presetNode.Attributes["onlyBigFish"]?.Value),
+                    description = presetNode.Attributes["description"]?.Value
                 };
 
                 // Parse Kinds (Items categories)
@@ -249,7 +251,7 @@ namespace YaogUI
             }
         }
 
-        public static void LoadPresets()
+        public static void LoadAllPresets()
         {
             presets.Clear();
             try
@@ -343,7 +345,7 @@ namespace YaogUI
                 if (StorageAreaHelper.presets.Count == 0)
                 {
                     Main.Debug("Loading presets...");
-                    StorageAreaHelper.LoadPresets();
+                    StorageAreaHelper.LoadAllPresets();
                 }
                 
                 var UI = StorageAreaHelper.UI;
@@ -373,7 +375,7 @@ namespace YaogUI
 
         public static void ReloadPresets()
         {
-            StorageAreaHelper.LoadPresets();
+            StorageAreaHelper.LoadAllPresets();
             CreatePresetDropdown();
         }
 
@@ -383,7 +385,7 @@ namespace YaogUI
             // Creating this combobox is a pain in the ass...
             var dropdown = UI_ComboBox.CreateInstance();
             dropdown.name = "YaogUI.PresetDropdown";
-            dropdown.x = UI.m_n25.x + (UI.m_n25.width - dropdown.width);
+            dropdown.x = UI.m_n25.x + (UI.m_n25.width - dropdown.width - 40);
             dropdown.y = UI.m_n25.y;
             // Values
             dropdown.values = new string[StorageAreaHelper.presets.Count + 1];
@@ -392,12 +394,17 @@ namespace YaogUI
             dropdown.values[0] = "-1";
             dropdown.value = "-1";
             dropdown.selectedIndex = 0;
+            dropdown.tips = new string[StorageAreaHelper.presets.Count + 1];
 
             int index = 1;
             foreach (var storagePreset in StorageAreaHelper.presets)
             {
                 dropdown.values[index] = storagePreset.Key;
                 dropdown.items[index] = storagePreset.Key;
+                if (!string.IsNullOrEmpty(storagePreset.Value.description))
+                {
+                    dropdown.tips[index] = storagePreset.Value.description;
+                }
                 ++index;
             }
 

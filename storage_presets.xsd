@@ -133,6 +133,7 @@
                         <xs:attribute name="onlyFSItem" type="xs:boolean"/>
                         <xs:attribute name="CanSale" type="xs:boolean"/>
                         <xs:attribute name="onlyBigFish" type="xs:boolean"/>
+                        <xs:attribute name="description" type="xs:string"/>
                     </xs:complexType>
                 </xs:element>
             </xs:sequence>

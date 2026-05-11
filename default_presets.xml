@@ -57,4 +57,13 @@
     </Preset>
     <Preset name="Relics" priority="High" onlyFSItem="true">
     </Preset>
+    <Preset name="Monster Items Only" priority="High" CanSale="false" description="Animal parts like Bull's Horn or Turtle Shell">
+        <Kind name="Equipment">
+            <Label>Tool</Label>
+        </Kind>
+        <Tier min="9" max="9"/>
+        <Quality>
+            <Label>Poor</Label>
+        </Quality>
+    </Preset>
 </Presets>

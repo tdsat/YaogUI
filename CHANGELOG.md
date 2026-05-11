@@ -1,3 +1,7 @@
+## v0.7
+- (Trade Window) Allow adding descriptions to presets
+- (Trade Window) Apply correct item quality when selecting preset
+
 ## v0.6.2 (06/05/2026)
 - (Misc) Fix loop shortcut logic
 - (Trade Window) Fix possible issue where the trade window would become unusable until reload
