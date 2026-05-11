@@ -23,7 +23,7 @@ namespace YaogUI
 		private const int fieldWidth = 40;
 		private const int fieldHeight = 20;
 
-		private static UI_NpcInfoLable GetLabelField(string name)
+		private static UI_NpcInfoLable CreateLabelField(string name)
 		{
 			var field = UI_NpcInfoLable.CreateInstance();
 			field.text = "-";
@@ -36,15 +36,15 @@ namespace YaogUI
 
 		public static void CreateFields(Wnd_CangJingGeWindow __instance)
 		{
-			yinAttainmentField = GetLabelField("YaogUI.YinAttainmentField");
-			yangAttainmentField = GetLabelField("YaogUI.YangAttainmentField");
-			totalAttainmentField = GetLabelField("YaogUI.TotalAttainmentField");
-			attainmentChangeField = GetLabelField("YaogUI.AttainmentChangeField");
+			yinAttainmentField = CreateLabelField("YaogUI.YinAttainmentField");
+			yangAttainmentField = CreateLabelField("YaogUI.YangAttainmentField");
+			totalAttainmentField = CreateLabelField("YaogUI.TotalAttainmentField");
+			attainmentChangeField = CreateLabelField("YaogUI.AttainmentChangeField");
 
-			npcYinAttainmentField = GetLabelField("YaogUI.NPCYinAttainmentField");
-			npcYangAttainmentField = GetLabelField("YaogUI.NPCYangAttainmentField");
-			npcTotalAttainmentField = GetLabelField("YaogUI.NPCTotalAttainmentField");
-			npcAttainmentChangeField = GetLabelField("YaogUI.NPCAttainmentChangeField");
+			npcYinAttainmentField = CreateLabelField("YaogUI.NPCYinAttainmentField");
+			npcYangAttainmentField = CreateLabelField("YaogUI.NPCYangAttainmentField");
+			npcTotalAttainmentField = CreateLabelField("YaogUI.NPCTotalAttainmentField");
+			npcAttainmentChangeField = CreateLabelField("YaogUI.NPCAttainmentChangeField");
 
 			var mainPane = (UI_CangJingGeWindow)__instance.contentPane;
 			var bgImage = new GImage();

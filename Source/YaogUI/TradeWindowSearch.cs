@@ -20,19 +20,20 @@ namespace YaogUI
 
 		public static void CleanUp()
 		{
+			// There MUST be a better way to achieve the same result...
 			if (sellSearchInput != null)
 			{
 				//Clear these events because there's weird case where they still trigger even if the input is not visible
-				sellSearchInput.text = "";
 				sellSearchInput.onKeyDown.Clear();
 				sellSearchInput.visible = false;
+				ClearBuySearch();
 			}
 
 			if (buySearchInput != null)
 			{
-				buySearchInput.text = "";
 				buySearchInput.onKeyDown.Clear();
 				buySearchInput.visible = false;
+				ClearSellSearch();
 			}
 
 			if (categoryList != null)
@@ -52,14 +53,14 @@ namespace YaogUI
 			var tradeWindow = Wnd_SchoolTrade.Instance;
 			var list = tradeWindow.UIInfo.m_rightitem;
 			var items = list.GetChildren();
-			var searchText = TradeWindowSearch.sellSearchInput.text.ToLower();
+			var searchText = sellSearchInput.text.ToLower();
 
 			// Meh... this can be simplified but w/e
 			var callbacks = new List<Func<UI_TradeItem, bool>>
 			{
 				item => item.m_itemname.text.ToLower().Contains(searchText)
 			};
-			if (TradeWindowSearch.ignoreWorthlessItems)
+			if (ignoreWorthlessItems)
 			{
 				callbacks.Add(item => !TradeWindowSearch.ignoreItemsList.Contains(item.name));
 			}
@@ -88,9 +89,10 @@ namespace YaogUI
 				item.visible = item.m_typename.text == "ItemType" ||
 				               item.m_itemname.text.ToLower().Contains(searchText);
 			}
+
 			FilterSchoolList(tradeWindow);
 		}
-		
+
 		// Gray-out schools that don't have the items matching the current search term
 		public static void FilterSchoolList(Wnd_SchoolTrade tradeWindow)
 		{
@@ -132,7 +134,7 @@ namespace YaogUI
 				// Re-attach keydown events
 				TradeWindowSearch.sellSearchInput.onKeyDown.Add(TradeWindowSearch.FilterSellList);
 				TradeWindowSearch.buySearchInput.onKeyDown.Add(TradeWindowSearch.FilterBuyList);
-				
+
 				categoryPanel.visible = true;
 				var sellItemList = __instance.UIInfo.m_rightitem;
 
@@ -207,8 +209,7 @@ namespace YaogUI
 				Main.Debug(e.ToString());
 			}
 		}
-		
-		
+
 		[HarmonyPatch(methodName: "OnHide")]
 		[HarmonyPostfix]
 		public static void OnHideCleanup()
@@ -216,7 +217,7 @@ namespace YaogUI
 			TradeWindowSearch.CleanUp();
 		}
 	}
-	
+
 	[HarmonyPatch(typeof(Wnd_SchoolTrade), "OnInit")]
 	public static class AddSearchFields
 	{
@@ -245,7 +246,6 @@ namespace YaogUI
 			TradeWindowSearch.categoryList.x = tradeWindow.UIInfo.m_rightitem.x + tradeWindow.UIInfo.m_rightitem.width;
 			TradeWindowSearch.categoryList.y = tradeWindow.UIInfo.m_rightitem.y - 60;
 		}
-
 
 		public static void AddTradeWindowSellItemSearch(Wnd_SchoolTrade tradeWindow)
 		{
@@ -308,7 +308,7 @@ namespace YaogUI
 			}
 		}
 
-		[HarmonyPatch(methodName: "ShowSchool")]
+		[HarmonyPatch(typeof(Wnd_SchoolTrade), "ShowSchool")]
 		[HarmonyPrefix]
 		public static void StorePriceDefForSchoolTrade(int school)
 		{
