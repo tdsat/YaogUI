@@ -88,6 +88,25 @@ namespace YaogUI
 				item.visible = item.m_typename.text == "ItemType" ||
 				               item.m_itemname.text.ToLower().Contains(searchText);
 			}
+			FilterSchoolList(tradeWindow);
+		}
+		
+		// Gray-out schools that don't have the items matching the current search term
+		public static void FilterSchoolList(Wnd_SchoolTrade tradeWindow)
+		{
+			var schoolList = tradeWindow.UIInfo.m_n51;
+			if (schoolList == null || schoolList.GetChildren().Length == 0) return;
+
+			var searchText = buySearchInput.text.ToLower();
+			foreach (var btn in schoolList.GetChildren())
+			{
+				int school = (int)btn.data;
+				var accessible = SchoolGlobleMgr.Instance.HasSchoolPower(school) && SchoolGlobleMgr.Instance.GetSchoolPower(school).GiftCount > 0;
+				var iData = (ITradeItemData) IManagerModule_LoopInterval<TradeMgr>.Instance.GetSchoolTrade(school);
+				
+				btn.grayed = !accessible
+				             || !iData.GetTradeItems().Exists((TradeItem item) => item.GetDisplayName().ToLower().Contains(searchText));
+			}
 		}
 
 		public static void ClearBuySearch()
