@@ -23,12 +23,14 @@ namespace YaogUI
 			if (sellSearchInput != null)
 			{
 				//Clear these events because there's weird case where they still trigger even if the input is not visible
+				sellSearchInput.text = "";
 				sellSearchInput.onKeyDown.Clear();
 				sellSearchInput.visible = false;
 			}
 
 			if (buySearchInput != null)
 			{
+				buySearchInput.text = "";
 				buySearchInput.onKeyDown.Clear();
 				buySearchInput.visible = false;
 			}
@@ -70,8 +72,7 @@ namespace YaogUI
 
 		public static void ClearSellSearch()
 		{
-			var searchField = TradeWindowSearch.sellSearchInput;
-			searchField.text = "";
+			sellSearchInput.text = "";
 			FilterSellList();
 		}
 
@@ -80,7 +81,7 @@ namespace YaogUI
 			var tradeWindow = Wnd_SchoolTrade.Instance;
 			var list = tradeWindow.UIInfo.m_leftitem;
 			var items = list.GetChildren();
-			var searchText = TradeWindowSearch.buySearchInput.text.ToLower();
+			var searchText = buySearchInput.text.ToLower();
 
 			foreach (UI_TradeItem item in items)
 			{
@@ -91,14 +92,15 @@ namespace YaogUI
 
 		public static void ClearBuySearch()
 		{
-			TradeWindowSearch.buySearchInput.text = "";
+			buySearchInput.text = "";
 			FilterBuyList();
 		}
 	}
 
-	[HarmonyPatch(typeof(Wnd_SchoolTrade), "OnShowUpdate")]
+	[HarmonyPatch(typeof(Wnd_SchoolTrade))]
 	public static class AddQuickCategoryListToTradeWindow
 	{
+		[HarmonyPatch(methodName: "OnShowUpdate")]
 		[HarmonyPostfix]
 		public static void UpdateCategoryListItems(Wnd_SchoolTrade __instance)
 		{
@@ -186,8 +188,16 @@ namespace YaogUI
 				Main.Debug(e.ToString());
 			}
 		}
+		
+		
+		[HarmonyPatch(methodName: "OnHide")]
+		[HarmonyPostfix]
+		public static void OnHideCleanup()
+		{
+			TradeWindowSearch.CleanUp();
+		}
 	}
-
+	
 	[HarmonyPatch(typeof(Wnd_SchoolTrade), "OnInit")]
 	public static class AddSearchFields
 	{
