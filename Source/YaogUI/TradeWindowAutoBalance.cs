@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace YaogUI
 {
-	public static class AutoBalance
+	public class AutoBalance : UIMod
 	{
 		public static GButton balanceRightBtn;
 		public static GButton balanceLeftBtn;
@@ -108,91 +108,55 @@ namespace YaogUI
 
 			return null;
 		}
-	}
-
-	[HarmonyPatch(typeof(Wnd_SchoolTrade), "OnInit")]
-	public static class AutoBalance_Wnd_SchoolTrade_OnInit
-	{
-		[HarmonyPostfix]
-		public static void AddBalanceButtons(Wnd_SchoolTrade __instance)
+		
+		
+		[HarmonyPatch]
+		public static class AutoBalance_Wnd_SchoolTrade_OnInit
 		{
-			try
+			[HarmonyPatch(typeof(Wnd_SchoolTrade), "OnInit")]
+			[HarmonyPostfix]
+			public static void AddBalanceButtons(Wnd_SchoolTrade __instance)
 			{
-				var UI = __instance.UIInfo;
-
-				AutoBalance.balanceRightBtn = (GButton)UIPackage.CreateObjectFromURL("ui://ncbwb41mv9j6ah");
-				var balanceRightBtn = AutoBalance.balanceRightBtn;
-				balanceRightBtn.name = "YaogUI.BalanceRight";
-				balanceRightBtn.text = TFMgr.Get("平衡");
-				balanceRightBtn.tooltips = TFMgr.Get("点击使用灵石平衡交易。");
-				balanceRightBtn.x = UI.width - 250;
-				balanceRightBtn.y = 65;
-
-				AutoBalance.balanceLeftBtn = (GButton)UIPackage.CreateObjectFromURL("ui://ncbwb41mv9j6ah");
-				var balanceLeft = AutoBalance.balanceLeftBtn;
-				
-				balanceLeft.name = "YaogUI.BalanceLeft";
-				balanceLeft.text = balanceRightBtn.text;
-				balanceLeft.tooltips = balanceRightBtn.tooltips;
-				balanceLeft.x = 180;
-				balanceLeft.y = 65;
-
-				UI.RemoveChild(balanceLeft);
-				UI.RemoveChild(balanceRightBtn);
-
-				balanceRightBtn.onClick.Add(AutoBalance.BalanceTradeNodes);
-				balanceLeft.onClick.Add(AutoBalance.BalanceTradeNodes);
-				UI.AddChild(balanceRightBtn);
-				UI.AddChild(balanceLeft);
-			}
-			catch (Exception e)
-			{
-				Main.Debug(e.ToString());
-			}
-		}
-	}
-
-	[HarmonyPatch(typeof(Wnd_SchoolTrade), "OnShowUpdate")]
-	public static class AutoBalance_Wnd_SchoolTrade_OnShowOrUpdate
-	{
-		[HarmonyPostfix]
-		[HarmonyPriority(Priority.LowerThanNormal)]
-		public static void MakeButtonsVisible(Wnd_SchoolTrade __instance)
-		{
-			AutoBalance.balanceLeftBtn.visible = true;
-			AutoBalance.balanceRightBtn.visible = true;
-		}
-
-		[HarmonyPostfix]
-		public static void AltClickToBalance(Wnd_SchoolTrade __instance)
-		{
-			var buyList = __instance.GetParts()[2] as TradeBuyList;
-			var leftTree = Traverse.Create(buyList).Field("leftTree").GetValue<TreeView>();
-			var leftSelect = Traverse.Create(buyList).Field("leftSelect").GetValue<TreeView>();
-
-			leftTree.onClickNode.Add(BalanceSheets);
-			return;
-
-			void BalanceSheets(EventContext context)
-			{
-				var node = context.data as TreeNode;
-				var tradeItem = node.data2 as TradeItem;
-				if (!context.inputEvent.alt || tradeItem?.ItemName != "Item_LingStone") return;
-
-				var sellValue = Traverse.Create(__instance).Method("GetRightSelectValue").GetValue<TradePrice>();
-				var buyValue = Traverse.Create(__instance).Method("GetLeftSelectValue").GetValue<TradePrice>();
-				// These can be null if there are no items being bought/sold
-				var sellPrice = sellValue?.Value ?? 0;
-				var buyPrice = buyValue?.Value ?? 0;
-				int difference = sellPrice - buyPrice;
-				// We need to subtract one because there's already a click handler to move 1 spirit stone
-				if (difference - 1 > 0)
+				try
 				{
-					Traverse.Create(buyList).Method("ToSelect", new[]
-								{ typeof(TreeNode), typeof(TreeView), typeof(int) },
-							new object[] { node, leftSelect, difference - 1 })
-						.GetValue();
+					var UI = __instance.UIInfo;
+
+					balanceRightBtn = (GButton)UIPackage.CreateObjectFromURL("ui://ncbwb41mv9j6ah");
+					balanceRightBtn = (GButton)GetOrAddChild(UI, balanceRightBtn, "YaogUI.BalanceRight");
+					balanceRightBtn.text = TFMgr.Get("平衡");
+					balanceRightBtn.tooltips = TFMgr.Get("点击使用灵石平衡交易。");
+					balanceRightBtn.x = UI.width - 250;
+					balanceRightBtn.y = 65;
+
+					balanceLeftBtn = (GButton)UIPackage.CreateObjectFromURL("ui://ncbwb41mv9j6ah");
+					balanceLeftBtn = (GButton)GetOrAddChild(UI, balanceLeftBtn, "YaogUI.BalanceLeft");
+				
+					balanceLeftBtn.name = "YaogUI.BalanceLeft";
+					balanceLeftBtn.text = balanceRightBtn.text;
+					balanceLeftBtn.tooltips = balanceRightBtn.tooltips;
+					balanceLeftBtn.x = 180;
+					balanceLeftBtn.y = 65;
+
+					UI.RemoveChild(balanceLeftBtn);
+					UI.RemoveChild(balanceRightBtn);
+
+					balanceRightBtn.onClick.Add(BalanceTradeNodes);
+					balanceLeftBtn.onClick.Add(BalanceTradeNodes);
+					// UI.AddChild(balanceRightBtn);
+					// UI.AddChild(balanceLeftBtn);
 				}
+				catch (Exception e)
+				{
+					Main.Debug(e.ToString());
+				}
+			}
+		
+			[HarmonyPatch(typeof(Wnd_SchoolTrade), "OnShowUpdate")]
+			[HarmonyPriority(Priority.LowerThanNormal)]
+			public static void MakeButtonsVisible(Wnd_SchoolTrade __instance)
+			{
+				balanceLeftBtn.visible = true;
+				balanceRightBtn.visible = true;
 			}
 		}
 	}

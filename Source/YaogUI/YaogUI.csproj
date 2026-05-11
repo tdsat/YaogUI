@@ -71,6 +71,7 @@
     <Compile Include="StorageArea.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UIMod.cs" />
     <Compile Include="UI_ClearableInput.cs"/>
     <Compile Include="UI_TalismanListItem.cs"/>
     <Compile Include="UI_TradeCategoryList.cs" />

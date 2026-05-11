@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace YaogUI
 {
-	public static class TradeWindowSearch
+	public class TradeWindowSearch : UIMod
 	{
 		public static List<string> ignoreItemsList = new List<string>();
 		public static TradePriceDef priceDef;
@@ -103,11 +103,13 @@ namespace YaogUI
 			foreach (var btn in schoolList.GetChildren())
 			{
 				int school = (int)btn.data;
-				var accessible = SchoolGlobleMgr.Instance.HasSchoolPower(school) && SchoolGlobleMgr.Instance.GetSchoolPower(school).GiftCount > 0;
-				var iData = (ITradeItemData) IManagerModule_LoopInterval<TradeMgr>.Instance.GetSchoolTrade(school);
-				
+				var accessible = SchoolGlobleMgr.Instance.HasSchoolPower(school) &&
+				                 SchoolGlobleMgr.Instance.GetSchoolPower(school).GiftCount > 0;
+				var iData = (ITradeItemData)IManagerModule_LoopInterval<TradeMgr>.Instance.GetSchoolTrade(school);
+
 				btn.grayed = !accessible
-				             || !iData.GetTradeItems().Exists((TradeItem item) => item.GetDisplayName().ToLower().Contains(searchText));
+				             || !iData.GetTradeItems().Exists((TradeItem item) =>
+					             item.GetDisplayName().ToLower().Contains(searchText));
 			}
 		}
 
@@ -116,217 +118,214 @@ namespace YaogUI
 			buySearchInput.text = "";
 			FilterBuyList();
 		}
-	}
 
-	[HarmonyPatch(typeof(Wnd_SchoolTrade))]
-	public static class AddQuickCategoryListToTradeWindow
-	{
-		[HarmonyPatch(methodName: "OnShowUpdate")]
-		[HarmonyPostfix]
-		public static void UpdateCategoryListItems(Wnd_SchoolTrade __instance)
+		
+		[HarmonyPatch(typeof(Wnd_SchoolTrade))]
+		public static class AddQuickCategoryListToTradeWindow
 		{
-			try
+			[HarmonyPatch(methodName: "OnShowUpdate")]
+			[HarmonyPostfix]
+			public static void UpdateCategoryListItems(Wnd_SchoolTrade __instance)
 			{
-				var categoryPanel = TradeWindowSearch.categoryList;
-
-				TradeWindowSearch.sellSearchInput.visible = true;
-				TradeWindowSearch.buySearchInput.visible = true;
-				// Re-attach keydown events
-				TradeWindowSearch.sellSearchInput.onKeyDown.Add(TradeWindowSearch.FilterSellList);
-				TradeWindowSearch.buySearchInput.onKeyDown.Add(TradeWindowSearch.FilterBuyList);
-
-				categoryPanel.visible = true;
-				var sellItemList = __instance.UIInfo.m_rightitem;
-
-				var categoryList = categoryPanel.m_list;
-				var items = sellItemList.GetChildren();
-				categoryList.RemoveChildrenToPool();
-				// Add link to spirit stone
-				var btn = (GButton)categoryList.AddItemFromPool();
-				btn.title = TFMgr.Get("灵石");
-				btn.height = 30;
-				btn.onClick.Add(() => sellItemList.ScrollToView(0, true, true));
-				foreach (var o in items)
+				try
 				{
-					var item = (UI_TradeItem)o;
-					if (item == null || item.name != "ItemType") continue;
-					var index = sellItemList.GetChildIndex(item);
-					btn = (GButton)categoryList.AddItemFromPool();
-					btn.title = item.m_typename.text;
+					var categoryPanel = TradeWindowSearch.categoryList;
+
+					sellSearchInput.visible = true;
+					buySearchInput.visible = true;
+					// Re-attach keydown events
+					sellSearchInput.onKeyDown.Add(FilterSellList);
+					buySearchInput.onKeyDown.Add(FilterBuyList);
+
+					categoryPanel.visible = true;
+					var sellItemList = __instance.UIInfo.m_rightitem;
+
+					var categoryList = categoryPanel.m_list;
+					var items = sellItemList.GetChildren();
+					categoryList.RemoveChildrenToPool();
+					// Add link to spirit stone
+					var btn = (GButton)categoryList.AddItemFromPool();
+					btn.title = TFMgr.Get("灵石");
 					btn.height = 30;
-					btn.onClick.Set(() => sellItemList.ScrollToView(index, true, true));
-				}
-
-				categoryPanel.height = categoryList.numItems * 30 + 65;
-				categoryPanel.m_hideWorthlessCheckbox.onClick.Add(e =>
-				{
-					TradeWindowSearch.ignoreWorthlessItems = ((GButton)e.sender).selected;
-					TradeWindowSearch.FilterSellList();
-				});
-				TradeWindowSearch.ignoreWorthlessItems = categoryPanel.m_hideWorthlessCheckbox.selected;
-				TradeWindowSearch.ignoreItemsList.Clear();
-				// Build a local cache of worthless items.
-				var saleList = __instance.GetParts()[3] as TradeSaleList;
-				var rightTree = Traverse.Create(saleList).Field("rightTree").GetValue<TreeView>();
-				var root = rightTree.root;
-				var iData = Traverse.Create(__instance).Field("_iData").GetValue<ITradeItemData>();
-
-				for (int i = 0; i < root.numChildren; i++)
-				{
-					var folder = root.GetChildAt(i);
-					for (int j = 0; j < folder.numChildren; j++)
+					btn.onClick.Add(() => sellItemList.ScrollToView(0, true, true));
+					foreach (var o in items)
 					{
-						TreeNode itemNode = folder.GetChildAt(j);
-						TradeSaleList.NodeData nodeData = saleList.TNode2NodeData(itemNode);
-						var itemName = itemNode.data as string;
+						var item = (UI_TradeItem)o;
+						if (item == null || item.name != "ItemType") continue;
+						var index = sellItemList.GetChildIndex(item);
+						btn = (GButton)categoryList.AddItemFromPool();
+						btn.title = item.m_typename.text;
+						btn.height = 30;
+						btn.onClick.Set(() => sellItemList.ScrollToView(index, true, true));
+					}
 
-						TradePrice tradeValue = TradeWindowSearch.priceDef
-							.GetItemPrice(nodeData.ItemName, nodeData.Rate).SalePrice;
-						var finalPrice = iData.ScaleSalePrice(tradeValue.Value, nodeData.ItemName);
-						// Main.Debug($"Final price for {nodeData.ItemName} with value of {finalPrice}");
+					categoryPanel.height = categoryList.numItems * 30 + 65;
+					categoryPanel.m_hideWorthlessCheckbox.onClick.Add(e =>
+					{
+						ignoreWorthlessItems = ((GButton)e.sender).selected;
+						FilterSellList();
+					});
+					ignoreWorthlessItems = categoryPanel.m_hideWorthlessCheckbox.selected;
+					ignoreItemsList.Clear();
+					// Build a local cache of worthless items.
+					var saleList = __instance.GetParts()[3] as TradeSaleList;
+					var rightTree = Traverse.Create(saleList).Field("rightTree").GetValue<TreeView>();
+					var root = rightTree.root;
+					var iData = Traverse.Create(__instance).Field("_iData").GetValue<ITradeItemData>();
 
-						if (finalPrice < 1)
+					for (int i = 0; i < root.numChildren; i++)
+					{
+						var folder = root.GetChildAt(i);
+						for (int j = 0; j < folder.numChildren; j++)
 						{
-							TradeWindowSearch.ignoreItemsList.Add(nodeData.ItemName);
-						}
+							TreeNode itemNode = folder.GetChildAt(j);
+							TradeSaleList.NodeData nodeData = saleList.TNode2NodeData(itemNode);
+							var itemName = itemNode.data as string;
 
-						// While we're at it, also sort the items in each folder by name
-						if (j > 0)
-						{
-							int k = j;
-							do
+							TradePrice tradeValue = priceDef
+								.GetItemPrice(nodeData.ItemName, nodeData.Rate).SalePrice;
+							var finalPrice = iData.ScaleSalePrice(tradeValue.Value, nodeData.ItemName);
+							// Main.Debug($"Final price for {nodeData.ItemName} with value of {finalPrice}");
+
+							if (finalPrice < 1)
 							{
-								TreeNode prevNode = folder.GetChildAt(--k);
-								var prevItemName = prevNode.data as string;
-								if (string.Compare(itemName, prevItemName) < 0) folder.SwapChildren(itemNode, prevNode);
-							} while (k > 0);
+								ignoreItemsList.Add(nodeData.ItemName);
+							}
+
+							// While we're at it, also sort the items in each folder by name
+							if (j > 0)
+							{
+								int k = j;
+								do
+								{
+									TreeNode prevNode = folder.GetChildAt(--k);
+									var prevItemName = prevNode.data as string;
+									if (string.Compare(itemName, prevItemName) < 0)
+										folder.SwapChildren(itemNode, prevNode);
+								} while (k > 0);
+							}
 						}
 					}
 				}
+				catch (Exception e)
+				{
+					Main.Debug(e.ToString());
+				}
 			}
-			catch (Exception e)
-			{
-				Main.Debug(e.ToString());
-			}
-		}
 
-		[HarmonyPatch(methodName: "OnHide")]
-		[HarmonyPostfix]
-		public static void OnHideCleanup()
-		{
-			TradeWindowSearch.CleanUp();
-		}
-	}
-
-	[HarmonyPatch(typeof(Wnd_SchoolTrade), "OnInit")]
-	public static class AddSearchFields
-	{
-		[HarmonyPostfix]
-		public static void Postfix(Wnd_SchoolTrade __instance)
-		{
-			try
+			[HarmonyPatch(methodName: "OnHide")]
+			[HarmonyPostfix]
+			public static void OnHideCleanup()
 			{
-				AddTradeWindowSellItemSearch(__instance);
-				AddTradeWindowBuyItemSearch(__instance);
-				AddCategoryPanel(__instance);
-			}
-			catch (Exception e)
-			{
-				Main.Debug(e.ToString());
+				CleanUp();
 			}
 		}
 
-		public static void AddCategoryPanel(Wnd_SchoolTrade tradeWindow)
+		[HarmonyPatch(typeof(Wnd_SchoolTrade), "OnInit")]
+		public static class AddSearchFields
 		{
-			TradeWindowSearch.categoryList = UI_TradeCategoryList.CreateInstance();
-			TradeWindowSearch.categoryList.name = "YaogUI.CategoryPanel";
-			TradeWindowSearch.categoryList.visible = true;
-			tradeWindow.UIInfo.AddChild(TradeWindowSearch.categoryList);
-			// Put it next to the sell list
-			TradeWindowSearch.categoryList.x = tradeWindow.UIInfo.m_rightitem.x + tradeWindow.UIInfo.m_rightitem.width;
-			TradeWindowSearch.categoryList.y = tradeWindow.UIInfo.m_rightitem.y - 60;
-		}
-
-		public static void AddTradeWindowSellItemSearch(Wnd_SchoolTrade tradeWindow)
-		{
-			TradeWindowSearch.sellSearchInput = UI_ClearableInput.CreateInstance();
-			TradeWindowSearch.sellSearchInput.name = "YaogUI.SellSearchInput";
-			var searchInput = TradeWindowSearch.sellSearchInput;
-			var clearSearchBtn = searchInput.m_clearButton;
-
-			var list = tradeWindow.UIInfo.m_rightitem;
-			list.foldInvisibleItems = true;
-
-			searchInput.x = list.x - 10;
-			searchInput.y = list.y - 40;
-			searchInput.width = list.width;
-
-			searchInput.onKeyDown.Add(TradeWindowSearch.FilterSellList);
-			clearSearchBtn.onClick.Add(TradeWindowSearch.ClearSellSearch);
-			// Search again when switching schools since items have changed
-			tradeWindow.UIInfo.m_n51.onClickItem.Add(TradeWindowSearch.ClearSellSearch);
-
-			tradeWindow.UIInfo.AddChild(searchInput);
-		}
-
-		public static void AddTradeWindowBuyItemSearch(Wnd_SchoolTrade tradeWindow)
-		{
-			TradeWindowSearch.buySearchInput = UI_ClearableInput.CreateInstance();
-			TradeWindowSearch.buySearchInput.name = "YaogUI.BuySearchInput";
-			var searchInput = TradeWindowSearch.buySearchInput;
-			var clearSearchBtn = searchInput.m_clearButton;
-
-			var list = tradeWindow.UIInfo.m_leftitem;
-			list.foldInvisibleItems = true;
-
-			searchInput.x = list.x - 10;
-			searchInput.y = list.y - 40;
-			searchInput.width = list.width;
-
-			searchInput.onKeyDown.Add(TradeWindowSearch.FilterBuyList);
-			clearSearchBtn.onClick.Add(TradeWindowSearch.ClearBuySearch);
-			// Search again when switching schools since items have changed
-			tradeWindow.UIInfo.m_n51.onClickItem.Add(TradeWindowSearch.FilterBuyList);
-
-			tradeWindow.UIInfo.AddChild(searchInput);
-		}
-	}
-
-	[HarmonyPatch]
-	public static class StoreRequiredVariables
-	{
-		// Needed to get the values of priceDef. Can't simply Traverse because they seem to be null
-		// when we need/use them
-		[HarmonyPatch(typeof(Wnd_SchoolTrade), "ShowWalkTrader")]
-		[HarmonyPrefix]
-		public static void StorePriceDefForTrader(string walker, Npc npc = null)
-		{
-			if (TradeWnd.HasTradeArea())
+			[HarmonyPostfix]
+			public static void Postfix(Wnd_SchoolTrade __instance)
 			{
-				TradeWalkDef tradeDef = TradeMgr.Instance.GetWalkTradeDef(null);
-				TradeWindowSearch.priceDef = TradeMgr.Instance.GetPriceDef(tradeDef.Price);
+				try
+				{
+					AddTradeWindowSellItemSearch(__instance);
+					AddTradeWindowBuyItemSearch(__instance);
+					AddCategoryPanel(__instance);
+				}
+				catch (Exception e)
+				{
+					Main.Debug(e.ToString());
+				}
+			}
+
+			public static void AddCategoryPanel(Wnd_SchoolTrade tradeWindow)
+			{
+				categoryList = (UI_TradeCategoryList)GetOrAddChild(tradeWindow.UIInfo, UI_TradeCategoryList.CreateInstance(), "YaogUI.CategoryPanel");
+				categoryList.visible = true;
+				// Put it next to the sell list
+				categoryList.x =
+					tradeWindow.UIInfo.m_rightitem.x + tradeWindow.UIInfo.m_rightitem.width;
+				categoryList.y = tradeWindow.UIInfo.m_rightitem.y - 60;
+			}
+
+			public static void AddTradeWindowSellItemSearch(Wnd_SchoolTrade tradeWindow)
+			{
+				sellSearchInput = (UI_ClearableInput)GetOrAddChild(tradeWindow.UIInfo, UI_ClearableInput.CreateInstance(), "YaogUI.SellSearchInput");
+				var searchInput = sellSearchInput;
+				var clearSearchBtn = searchInput.m_clearButton;
+
+				var list = tradeWindow.UIInfo.m_rightitem;
+				list.foldInvisibleItems = true;
+
+				searchInput.x = list.x - 10;
+				searchInput.y = list.y - 40;
+				searchInput.width = list.width;
+
+				searchInput.onKeyDown.Add(FilterSellList);
+				clearSearchBtn.onClick.Add(ClearSellSearch);
+				// Search again when switching schools since items have changed
+				tradeWindow.UIInfo.m_n51.onClickItem.Add(ClearSellSearch);
+			}
+
+			public static void AddTradeWindowBuyItemSearch(Wnd_SchoolTrade tradeWindow)
+			{
+				buySearchInput = UI_ClearableInput.CreateInstance();
+				buySearchInput = (UI_ClearableInput)GetOrAddChild(tradeWindow.UIInfo, UI_ClearableInput.CreateInstance(), "YaogUI.BuySearchInput");
+
+				var searchInput = buySearchInput;
+				var clearSearchBtn = searchInput.m_clearButton;
+
+				var list = tradeWindow.UIInfo.m_leftitem;
+				list.foldInvisibleItems = true;
+
+				searchInput.x = list.x - 10;
+				searchInput.y = list.y - 40;
+				searchInput.width = list.width;
+
+				searchInput.onKeyDown.Add(FilterBuyList);
+				clearSearchBtn.onClick.Add(ClearBuySearch);
+				// Search again when switching schools since items have changed
+				tradeWindow.UIInfo.m_n51.onClickItem.Add(FilterBuyList);
 			}
 		}
 
-		[HarmonyPatch(typeof(Wnd_SchoolTrade), "ShowSchool")]
-		[HarmonyPrefix]
-		public static void StorePriceDefForSchoolTrade(int school)
+		[HarmonyPatch]
+		public static class StoreRequiredVariables
 		{
-			if (TradeWnd.HasTradeArea())
+			// Needed to get the values of priceDef. Can't simply Traverse because they seem to be null
+			// when we need/use them
+			[HarmonyPatch(typeof(Wnd_SchoolTrade), "ShowWalkTrader")]
+			[HarmonyPrefix]
+			public static void StorePriceDefForTrader(string walker, Npc npc = null)
 			{
-				SchoolTradeDef schoolDef = TradeMgr.Instance.GetSchoolTradeDef(school);
-				TradeWindowSearch.priceDef = TradeMgr.Instance.GetPriceDef(schoolDef.Price);
+				if (TradeWnd.HasTradeArea())
+				{
+					TradeWalkDef tradeDef = TradeMgr.Instance.GetWalkTradeDef(null);
+					priceDef = TradeMgr.Instance.GetPriceDef(tradeDef.Price);
+				}
 			}
-		}
 
-		// Needed so that components get hidden when user accepts trade. There might be a better way to achieve this
-		[HarmonyPatch(typeof(Wnd_SchoolTrade), "__selectyes")]
-		[HarmonyPostfix]
-		public static void HideTradeComponents(Wnd_SchoolTrade __instance)
-		{
-			if (__instance.UIInfo.m_state.selectedIndex == 1)
+			[HarmonyPatch(typeof(Wnd_SchoolTrade), "ShowSchool")]
+			[HarmonyPrefix]
+			public static void StorePriceDefForSchoolTrade(int school)
 			{
-				TradeWindowSearch.CleanUp();
+				if (TradeWnd.HasTradeArea())
+				{
+					SchoolTradeDef schoolDef = TradeMgr.Instance.GetSchoolTradeDef(school);
+					priceDef = TradeMgr.Instance.GetPriceDef(schoolDef.Price);
+				}
+			}
+
+			// Needed so that components get hidden when user accepts trade. There might be a better way to achieve this
+			[HarmonyPatch(typeof(Wnd_SchoolTrade), "__selectyes")]
+			[HarmonyPostfix]
+			public static void HideTradeComponents(Wnd_SchoolTrade __instance)
+			{
+				if (__instance.UIInfo.m_state.selectedIndex == 1)
+				{
+					CleanUp();
+				}
 			}
 		}
 	}
