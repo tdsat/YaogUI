@@ -1,7 +1,8 @@
 ## v0.7
 - (Trade Window) Allow adding descriptions to presets
-- (Trade Window) Apply correct item quality when selecting preset
+- (Trade Window) Schools that don't have items that match the current search are grayed-out
 - (Misc) When crafting sub-spirit gear, the Manual tooltip now contains all the information related to that manual
+- (Storage Area) Apply correct item quality when selecting preset
 
 ## v0.6.2 (06/05/2026)
 - (Misc) Fix loop shortcut logic
