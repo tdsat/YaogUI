@@ -1,4 +1,4 @@
-## v0.7
+## v0.7 (12/05/2026)
 - (Trade Window) Allow adding descriptions to presets
 - (Trade Window) Schools that don't have items that match the current search are grayed-out
 - (Misc) When crafting sub-spirit gear, the Manual tooltip now contains all the information related to that manual
