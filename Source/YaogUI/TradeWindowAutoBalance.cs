@@ -131,19 +131,13 @@ namespace YaogUI
 					balanceLeftBtn = (GButton)UIPackage.CreateObjectFromURL("ui://ncbwb41mv9j6ah");
 					balanceLeftBtn = (GButton)GetOrAddChild(UI, balanceLeftBtn, "YaogUI.BalanceLeft");
 				
-					balanceLeftBtn.name = "YaogUI.BalanceLeft";
 					balanceLeftBtn.text = balanceRightBtn.text;
 					balanceLeftBtn.tooltips = balanceRightBtn.tooltips;
 					balanceLeftBtn.x = 180;
 					balanceLeftBtn.y = 65;
 
-					UI.RemoveChild(balanceLeftBtn);
-					UI.RemoveChild(balanceRightBtn);
-
 					balanceRightBtn.onClick.Add(BalanceTradeNodes);
 					balanceLeftBtn.onClick.Add(BalanceTradeNodes);
-					// UI.AddChild(balanceRightBtn);
-					// UI.AddChild(balanceLeftBtn);
 				}
 				catch (Exception e)
 				{
@@ -153,6 +147,7 @@ namespace YaogUI
 		
 			[HarmonyPatch(typeof(Wnd_SchoolTrade), "OnShowUpdate")]
 			[HarmonyPriority(Priority.LowerThanNormal)]
+			[HarmonyPostfix]
 			public static void MakeButtonsVisible(Wnd_SchoolTrade __instance)
 			{
 				balanceLeftBtn.visible = true;

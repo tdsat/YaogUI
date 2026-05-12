@@ -66,7 +66,6 @@ namespace YaogUI
 
 	[HarmonyPatch]
 	public static class ProduceShortcuts
-	
 	{
 		[HarmonyPatch(typeof(Wnd_BuildingProduce), "__clickSelectItem")]
 		[HarmonyPostfix]
